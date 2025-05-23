@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Report - Google Search Console Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        dark: '#1F2937',
+                        light: '#F9FAFB'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .trend-up {
+            background: linear-gradient(to right, #10B98120, transparent);
+        }
+        .trend-down {
+            background: linear-gradient(to right, #EF444420, transparent);
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .grid-stack-item {
+            transition: all 0.3s ease;
+        }
+        .grid-stack-item:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-white w-64 border-r border-gray-200 flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <div class="flex items-center">
+                    <span class="text-lg font-medium text-gray-800">Angle Out</span>
+                </div>
+                <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <nav class="p-2">
+                    <div class="mb-4">
+                        <a href="/dashboard" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-home mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Dashboard
+                        </a>
+                        <a href="/ranktracker" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-chart-line mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Rank Tracker
+                        </a>
+                        <a href="/monthlyreport" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md bg-blue-50 text-blue-700">
+                            <i class="fas fa-calendar-alt mr-3 text-blue-600 group-hover:text-blue-700"></i>
+                            Monthly Report
+                        </a>
+                        <a href="/contentdecay" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-chart-line mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Content Decay
+                        </a>
+                        <a href="#" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-tools mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Tools
+                        </a>
+                    </div>
+                    </nav>
+                </div>
+                <div class="p-4 border-t border-gray-200">
+                    <div class="flex items-center">
+                    <img src="{{ profile_pic }}" alt="User" class="h-8 w-8 rounded-full mr-2">
+                    <div>
+                        <div class="text-sm font-medium text-gray-800">{{ user_name }}</div>
+                        <div class="text-xs text-gray-500">{{ user_email}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Top navigation -->
+            <header class="bg-white border-b border-gray-200">
+                <div class="flex items-center justify-end px-6 py-3">
+                    <div class="flex items-center space-x-4 mr-2">
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-cog"></i>
+                    </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bell"></i>
+                    </button>
+
+                        <a href="/signout" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                        
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main content area -->
+            <div class="flex-1 overflow-auto p-6">
+                <!-- Property selector -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-dark">Monthly Performance Report</h2>
+                        <p class="text-gray-500">Compare your SEO performance month over month</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <div class="text-sm text-gray-500 mb-1">Property</div>
+                        <form id="propertyForm" method="POST" action="/monthlyreport">
+                            <div class="flex items-center">
+                                <select id="projects-ids" name="projects-ids" 
+                                    class="block w-64 px-4 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 appearance-none">
+                                    {% for each_site in site_list_sorted %}
+                                        {% if each_site == selected_property %}
+                                        <option value="{{ each_site }}" selected>{{ each_site }}</option>
+                                        {% else %}
+                                        <option value="{{ each_site }}">{{ each_site }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Metrics comparison -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <!-- Clicks card -->
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-medium text-gray-700">Clicks</h3>
+                            <div class="flex items-center" id="clicksPercentage">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <p class="text-2xl font-bold text-dark" id="currentClicks">-</p>
+                                <p class="text-sm text-gray-500">Current month</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xl font-bold text-gray-500" id="previousClicks">-</p>
+                                <p class="text-sm text-gray-500">Previous month</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full" id="clicksProgressBar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Impressions card -->
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-medium text-gray-700">Impressions</h3>
+                            <div class="flex items-center" id="impressionsPercentage">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <p class="text-2xl font-bold text-dark" id="currentImpressions">-</p>
+                                <p class="text-sm text-gray-500">Current month</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xl font-bold text-gray-500" id="previousImpressions">-</p>
+                                <p class="text-sm text-gray-500">Previous month</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full" id="impressionsProgressBar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CTR card -->
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-medium text-gray-700">CTR</h3>
+                            <div class="flex items-center" id="ctrPercentage">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <p class="text-2xl font-bold text-dark" id="currentCTR">-</p>
+                                <p class="text-sm text-gray-500">Current month</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xl font-bold text-gray-500" id="previousCTR">-</p>
+                                <p class="text-sm text-gray-500">Previous month</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full" id="ctrProgressBar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Avg. Position card -->
+                    <div class="bg-white rounded-xl card-shadow p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-medium text-gray-700">Avg. Position</h3>
+                            <div class="flex items-center" id="positionPercentage">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <p class="text-2xl font-bold text-dark" id="currentPosition">-</p>
+                                <p class="text-sm text-gray-500">Current month</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xl font-bold text-gray-500" id="previousPosition">-</p>
+                                <p class="text-sm text-gray-500">Previous month</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full" id="positionProgressBar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance trend chart -->
+                <div class="bg-white rounded-xl card-shadow p-6 mb-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-medium text-gray-800">Performance Trend</h3>
+                        <div class="flex space-x-2" id="chartButtons">
+                            <button class="px-3 py-1 text-sm font-medium text-primary bg-primary bg-opacity-10 rounded-lg" data-metric="clicks">Clicks</button>
+                            <button class="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50" data-metric="impressions">Impressions</button>
+                            <button class="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50" data-metric="ctr">CTR</button>
+                            <button class="px-3 py-1 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50" data-metric="position">Position</button>
+                        </div>
+                    </div>
+                    <div class="h-80">
+                        <canvas id="performanceChart"></canvas>
+                            </div>
+                        </div>
+
+                <!-- Performance Table -->
+                <div class="bg-white rounded-xl card-shadow overflow-hidden mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-800">Performance Data</h3>
+                        <p class="text-sm text-gray-500">Monthly performance metrics in tabular format</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clicks</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Impressions</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CTR</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="performanceTableBody">
+                                <!-- Will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Top performing pages -->
+                <div class="bg-white rounded-xl card-shadow overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-800">Top Performing Pages (by Clicks Difference)</h3>
+                        <p class="text-sm text-gray-500">Pages with the highest increase in clicks compared to previous month</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Page</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Clicks</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Previous Clicks</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Difference</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="topPerformingPagesBody">
+                                <!-- Will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination controls -->
+                    <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                        <div class="flex-1 flex justify-between sm:hidden">
+                            <button id="prevPageMobile" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                Previous
+                            </button>
+                            <button id="nextPageMobile" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                Next
+                        </button>
+                    </div>
+                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-sm text-gray-700">
+                                    Showing <span id="startIndex">1</span> to <span id="endIndex">10</span> of <span id="totalItems">0</span> results
+                                </p>
+                            </div>
+                            <div>
+                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination" id="paginationControls">
+                                    <!-- Will be populated by JavaScript -->
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar on mobile
+        document.querySelectorAll('.fa-bars').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('hidden');
+                document.querySelector('.sidebar').classList.toggle('md:flex');
+            });
+        });
+
+        // Add hover effect to grid items
+        document.querySelectorAll('.grid-stack-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                item.classList.add('shadow-lg');
+            });
+            item.addEventListener('mouseleave', () => {
+                item.classList.remove('shadow-lg');
+            });
+        });
+
+        // Auto-submit form when property changes
+        document.getElementById('projects-ids').addEventListener('change', function() {
+            document.getElementById('propertyForm').submit();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Parse the date data from the server
+            const dateData = JSON.parse('{{ tables_data["date_data"] | tojson | safe }}');
+            
+            // Convert the data into arrays for easier processing
+            const dates = Object.values(dateData.DATE);
+            const clicks = Object.values(dateData.Clicks);
+            const impressions = Object.values(dateData.Impressions);
+            const ctr = Object.values(dateData.CTR);
+            const position = Object.values(dateData.Position);
+
+            // Function to group data by month
+            function groupDataByMonth(dates, values, isPosition = false) {
+                const monthlyData = {};
+                const monthlyCounts = {};
+                
+                dates.forEach((date, index) => {
+                    const dateObj = new Date(date);
+                    const monthYear = dateObj.toLocaleString('default', { month: 'short', year: '2-digit' });
+                    
+                    if (!monthlyData[monthYear]) {
+                        monthlyData[monthYear] = 0;
+                        monthlyCounts[monthYear] = 0;
+                    }
+                    monthlyData[monthYear] += values[index];
+                    monthlyCounts[monthYear]++;
+                });
+
+                // Calculate average for position
+                if (isPosition) {
+                    Object.keys(monthlyData).forEach(month => {
+                        monthlyData[month] = monthlyData[month] / monthlyCounts[month];
+                    });
+                }
+
+                return monthlyData;
+            }
+
+            // Group all metrics by month
+            const monthlyClicks = groupDataByMonth(dates, clicks);
+            const monthlyImpressions = groupDataByMonth(dates, impressions);
+            const monthlyPosition = groupDataByMonth(dates, position, true); // Pass true for position to calculate average
+
+            // Calculate CTR for each month using the correct formula
+            const monthlyCTR = {};
+            Object.keys(monthlyClicks).forEach(month => {
+                const totalClicks = monthlyClicks[month];
+                const totalImpressions = monthlyImpressions[month];
+                monthlyCTR[month] = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+            });
+
+            // Get all unique months for chart (ascending order)
+            const months = Object.keys(monthlyClicks).sort((a, b) => {
+                const [monthA, yearA] = a.split(' ');
+                const [monthB, yearB] = b.split(' ');
+                const dateA = new Date(`${monthA} 1, ${yearA}`);
+                const dateB = new Date(`${monthB} 1, ${yearB}`);
+                return dateA - dateB; // Ascending order for chart
+            });
+
+            // Get current and previous month data from the sorted months
+            const currentMonth = months[months.length - 1]; // Last month in the data
+            const previousMonth = months[months.length - 2]; // Second last month in the data
+
+            // Get metrics for current and previous months
+            const currentMonthMetrics = {
+                clicks: monthlyClicks[currentMonth],
+                impressions: monthlyImpressions[currentMonth],
+                ctr: monthlyCTR[currentMonth],
+                position: monthlyPosition[currentMonth]
+            };
+
+            const previousMonthMetrics = {
+                clicks: monthlyClicks[previousMonth],
+                impressions: monthlyImpressions[previousMonth],
+                ctr: monthlyCTR[previousMonth],
+                position: monthlyPosition[previousMonth]
+            };
+
+            // Function to calculate percentage change
+            function calculatePercentageChange(current, previous, isPosition = false) {
+                if (previous === 0) return current > 0 ? 100 : 0;
+                if (isPosition) {
+                    // For position, a decrease is positive (better ranking)
+                    return ((previous - current) / previous) * 100;
+                }
+                return ((current - previous) / previous) * 100;
+            }
+
+            // Function to format numbers in K and M format
+            function formatNumberWithSuffix(total) {
+                if (total >= 1000000) {
+                    const total_m = total / 1000000;
+                    return total_m.toFixed(1) + 'M';
+                } else if (total >= 10000) {
+                    const total_k = total / 1000;
+                    return total_k.toFixed(1) + 'K';
+                } else {
+                    return total.toString();
+                }
+            }
+
+            // Function to update metric card
+            function updateMetricCard(metric, currentValue, previousValue, elementIds) {
+                const isPosition = metric === 'Position';
+                const percentageChange = calculatePercentageChange(currentValue, previousValue, isPosition);
+                const percentageElement = document.getElementById(elementIds.percentage);
+                const currentElement = document.getElementById(elementIds.current);
+                const previousElement = document.getElementById(elementIds.previous);
+                const progressBar = document.getElementById(elementIds.progressBar);
+
+                // Update values with appropriate formatting
+                if (metric === 'Clicks' || metric === 'Impressions') {
+                    currentElement.textContent = formatNumberWithSuffix(currentValue);
+                    previousElement.textContent = formatNumberWithSuffix(previousValue);
+                } else if (metric === 'CTR') {
+                    currentElement.textContent = currentValue.toFixed(2) + '%';
+                    previousElement.textContent = previousValue.toFixed(2) + '%';
+                } else if (metric === 'Position') {
+                    currentElement.textContent = currentValue.toFixed(1);
+                    previousElement.textContent = previousValue.toFixed(1);
+                }
+
+                // Update percentage and color
+                let colorClass, bgColorClass;
+                if (isPosition) {
+                    // For position, positive change means better ranking (decrease in position value)
+                    if (percentageChange > 0) {
+                        colorClass = 'bg-green-100 text-green-800';
+                        bgColorClass = 'bg-green-500';
+                    } else if (percentageChange < 0) {
+                        colorClass = 'bg-red-100 text-red-800';
+                        bgColorClass = 'bg-red-500';
+                    } else {
+                        colorClass = 'bg-blue-100 text-blue-800';
+                        bgColorClass = 'bg-blue-500';
+                    }
+                } else {
+                    // For other metrics, positive change is good
+                    if (percentageChange > 0) {
+                        colorClass = 'bg-green-100 text-green-800';
+                        bgColorClass = 'bg-green-500';
+                    } else if (percentageChange < 0) {
+                        colorClass = 'bg-red-100 text-red-800';
+                        bgColorClass = 'bg-red-500';
+                    } else {
+                        colorClass = 'bg-blue-100 text-blue-800';
+                        bgColorClass = 'bg-blue-500';
+                    }
+                }
+
+                percentageElement.innerHTML = `
+                    <span class="text-xs font-medium px-2 py-1 rounded-full ${colorClass}">
+                        ${percentageChange > 0 ? '+' : ''}${percentageChange.toFixed(1)}%
+                    </span>
+                `;
+
+                // Update progress bar
+                const progressWidth = percentageChange === 0 ? 100 : Math.min(Math.abs(percentageChange), 100);
+                progressBar.style.width = `${progressWidth}%`;
+                progressBar.className = `h-full rounded-full ${bgColorClass}`;
+            }
+
+            // Update all metric cards
+            updateMetricCard('Clicks', currentMonthMetrics.clicks, previousMonthMetrics.clicks, {
+                percentage: 'clicksPercentage',
+                current: 'currentClicks',
+                previous: 'previousClicks',
+                progressBar: 'clicksProgressBar'
+            });
+
+            updateMetricCard('Impressions', currentMonthMetrics.impressions, previousMonthMetrics.impressions, {
+                percentage: 'impressionsPercentage',
+                current: 'currentImpressions',
+                previous: 'previousImpressions',
+                progressBar: 'impressionsProgressBar'
+            });
+
+            updateMetricCard('CTR', currentMonthMetrics.ctr, previousMonthMetrics.ctr, {
+                percentage: 'ctrPercentage',
+                current: 'currentCTR',
+                previous: 'previousCTR',
+                progressBar: 'ctrProgressBar'
+            });
+
+            updateMetricCard('Position', currentMonthMetrics.position, previousMonthMetrics.position, {
+                percentage: 'positionPercentage',
+                current: 'currentPosition',
+                previous: 'previousPosition',
+                progressBar: 'positionProgressBar'
+            });
+
+            // Chart configuration
+            const chartConfig = {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Clicks',
+                        data: months.map(month => monthlyClicks[month]),
+                        borderColor: '#4F46E5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            mode: 'index',
+                            intersect: false
+                        },
+                        crosshair: {
+                            line: {
+                                color: function(context) {
+                                    return context.dataset.borderColor;
+                                },
+                                width: 2,
+                                dashPattern: [5, 5]
+                            },
+                            sync: {
+                                enabled: true
+                            },
+                            zoom: {
+                                enabled: false
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Create the chart
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            const performanceChart = new Chart(ctx, chartConfig);
+
+            // Add hover line plugin
+            Chart.register({
+                id: 'hoverLine',
+                afterDraw: function(chart) {
+                    if (chart.tooltip._active && chart.tooltip._active.length) {
+                        const activePoint = chart.tooltip._active[0];
+                        const ctx = chart.ctx;
+                        const x = activePoint.element.x;
+                        const topY = chart.scales.y.top;
+                        const bottomY = chart.scales.y.bottom;
+
+                        // Save the current context state
+                        ctx.save();
+                        
+                        // Set the line style
+                        ctx.beginPath();
+                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = activePoint.element.borderColor;
+                        ctx.setLineDash([5, 5]);
+                        
+                        // Draw the vertical line
+                        ctx.moveTo(x, topY);
+                        ctx.lineTo(x, bottomY);
+                        ctx.stroke();
+                        
+                        // Restore the context state
+                        ctx.restore();
+                    }
+                }
+            });
+
+            // Chart button click handlers
+            const chartButtons = document.getElementById('chartButtons');
+            const buttons = chartButtons.getElementsByTagName('button');
+
+            function updateChart(metric) {
+                // Update button styles
+                Array.from(buttons).forEach(button => {
+                    if (button.dataset.metric === metric) {
+                        button.classList.remove('text-gray-500', 'bg-white', 'border-gray-300');
+                        button.classList.add('text-primary', 'bg-primary', 'bg-opacity-10');
+                    } else {
+                        button.classList.remove('text-primary', 'bg-primary', 'bg-opacity-10');
+                        button.classList.add('text-gray-500', 'bg-white', 'border-gray-300');
+                    }
+                });
+
+                // Update chart data
+                let data, color, label;
+                switch(metric) {
+                    case 'clicks':
+                        data = months.map(month => monthlyClicks[month]);
+                        color = '#4F46E5';
+                        label = 'Clicks';
+                        break;
+                    case 'impressions':
+                        data = months.map(month => monthlyImpressions[month]);
+                        color = '#10B981';
+                        label = 'Impressions';
+                        break;
+                    case 'ctr':
+                        data = months.map(month => monthlyCTR[month]);
+                        color = '#F59E0B';
+                        label = 'CTR';
+                        break;
+                    case 'position':
+                        data = months.map(month => monthlyPosition[month]);
+                        color = '#EF4444';
+                        label = 'Position';
+                        break;
+                }
+
+                performanceChart.data.datasets[0].data = data;
+                performanceChart.data.datasets[0].borderColor = color;
+                performanceChart.data.datasets[0].backgroundColor = `${color}1A`;
+                performanceChart.data.datasets[0].label = label;
+                performanceChart.update();
+            }
+
+            // Add click handlers to buttons
+            Array.from(buttons).forEach(button => {
+                button.addEventListener('click', () => {
+                    updateChart(button.dataset.metric);
+                });
+            });
+
+            // Function to update the performance table
+            function updatePerformanceTable() {
+                const tableBody = document.getElementById('performanceTableBody');
+                tableBody.innerHTML = '';
+
+                // Sort months in descending order for the table
+                const sortedMonths = [...months].sort((a, b) => {
+                    const [monthA, yearA] = a.split(' ');
+                    const [monthB, yearB] = b.split(' ');
+                    const dateA = new Date(`${monthA} 1, ${yearA}`);
+                    const dateB = new Date(`${monthB} 1, ${yearB}`);
+                    return dateB - dateA; // Descending order for table
+                });
+
+                sortedMonths.forEach(month => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+                    
+                    // Format the data
+                    const clicks = monthlyClicks[month].toLocaleString();
+                    const impressions = monthlyImpressions[month].toLocaleString();
+                    const ctr = monthlyCTR[month].toFixed(2) + '%';
+                    const position = monthlyPosition[month].toFixed(1);
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${month}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${clicks}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${impressions}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${ctr}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${position}</td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            }
+
+            // Update the table when the page loads
+            updatePerformanceTable();
+
+            // Function to process and display top performing pages
+            function updateTopPerformingPages() {
+                const tableBody = document.getElementById('topPerformingPagesBody');
+                tableBody.innerHTML = '';
+
+                // Get the compare tables data
+                const compareData = JSON.parse('{{ compare_tables_data | tojson | safe }}');
+                const currentData = compareData.current_month_page_data;
+                const previousData = compareData.previous_month_page_data;
+
+                // Get unique pages from both datasets
+                const uniquePages = new Set([
+                    ...Object.values(currentData.PAGE),
+                    ...Object.values(previousData.PAGE)
+                ]);
+
+                // Create array of page data with clicks comparison
+                const pageData = Array.from(uniquePages).map(page => {
+                    // Find current month clicks
+                    const currentIndex = Object.values(currentData.PAGE).indexOf(page);
+                    const currentClicks = currentIndex !== -1 ? currentData.Clicks[currentIndex] : 0;
+
+                    // Find previous month clicks
+                    const previousIndex = Object.values(previousData.PAGE).indexOf(page);
+                    const previousClicks = previousIndex !== -1 ? previousData.Clicks[previousIndex] : 0;
+
+                    // Calculate difference and percentage change
+                    const difference = currentClicks - previousClicks;
+                    const percentageChange = previousClicks === 0 ? 
+                        (currentClicks > 0 ? 100 : 0) : 
+                        ((difference / previousClicks) * 100);
+
+                    return {
+                        page,
+                        currentClicks,
+                        previousClicks,
+                        difference,
+                        percentageChange
+                    };
+                });
+
+                // Sort by difference in descending order
+                pageData.sort((a, b) => b.difference - a.difference);
+
+                // Pagination settings
+                const itemsPerPage = 10;
+                const totalItems = pageData.length;
+                const totalPages = Math.ceil(totalItems / itemsPerPage);
+                let currentPage = 1;
+
+                // Function to update pagination controls
+                function updatePaginationControls() {
+                    const paginationControls = document.getElementById('paginationControls');
+                    paginationControls.innerHTML = '';
+
+                    // Previous button
+                    const prevButton = document.createElement('button');
+                    prevButton.className = `relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`;
+                    prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                    prevButton.disabled = currentPage === 1;
+                    prevButton.onclick = () => {
+                        if (currentPage > 1) {
+                            currentPage--;
+                            displayPage(currentPage);
+                        }
+                    };
+                    paginationControls.appendChild(prevButton);
+
+                    // Calculate the range of page numbers to display
+                    let startPage, endPage;
+                    if (totalPages <= 5) {
+                        // If total pages is 5 or less, show all pages
+                        startPage = 1;
+                        endPage = totalPages;
+                    } else if (currentPage <= 3) {
+                        // If current page is in first 3 pages, show first 5 pages
+                        startPage = 1;
+                        endPage = 5;
+                    } else if (currentPage >= totalPages - 2) {
+                        // If current page is in last 3 pages, show last 5 pages
+                        startPage = totalPages - 4;
+                        endPage = totalPages;
+                    } else {
+                        // Show 2 pages before and after current page
+                        startPage = currentPage - 2;
+                        endPage = currentPage + 2;
+                    }
+
+                    // Add first page and ellipsis if needed
+                    if (startPage > 1) {
+                        const firstPageButton = document.createElement('button');
+                        firstPageButton.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50';
+                        firstPageButton.textContent = '1';
+                        firstPageButton.onclick = () => {
+                            currentPage = 1;
+                            displayPage(currentPage);
+                        };
+                        paginationControls.appendChild(firstPageButton);
+
+                        if (startPage > 2) {
+                            const ellipsis = document.createElement('span');
+                            ellipsis.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700';
+                            ellipsis.textContent = '...';
+                            paginationControls.appendChild(ellipsis);
+                        }
+                    }
+
+                    // Add page numbers
+                    for (let i = startPage; i <= endPage; i++) {
+                        const pageButton = document.createElement('button');
+                        pageButton.className = `relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium ${currentPage === i ? 'text-primary bg-primary bg-opacity-10' : 'text-gray-700 hover:bg-gray-50'}`;
+                        pageButton.textContent = i;
+                        pageButton.onclick = () => {
+                            currentPage = i;
+                            displayPage(currentPage);
+                        };
+                        paginationControls.appendChild(pageButton);
+                    }
+
+                    // Add ellipsis and last page if needed
+                    if (endPage < totalPages) {
+                        if (endPage < totalPages - 1) {
+                            const ellipsis = document.createElement('span');
+                            ellipsis.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700';
+                            ellipsis.textContent = '...';
+                            paginationControls.appendChild(ellipsis);
+                        }
+
+                        const lastPageButton = document.createElement('button');
+                        lastPageButton.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50';
+                        lastPageButton.textContent = totalPages;
+                        lastPageButton.onclick = () => {
+                            currentPage = totalPages;
+                            displayPage(currentPage);
+                        };
+                        paginationControls.appendChild(lastPageButton);
+                    }
+
+                    // Next button
+                    const nextButton = document.createElement('button');
+                    nextButton.className = `relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`;
+                    nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                    nextButton.disabled = currentPage === totalPages;
+                    nextButton.onclick = () => {
+                        if (currentPage < totalPages) {
+                            currentPage++;
+                            displayPage(currentPage);
+                        }
+                    };
+                    paginationControls.appendChild(nextButton);
+
+                    // Update mobile pagination buttons
+                    document.getElementById('prevPageMobile').disabled = currentPage === 1;
+                    document.getElementById('nextPageMobile').disabled = currentPage === totalPages;
+                    document.getElementById('prevPageMobile').onclick = () => {
+                        if (currentPage > 1) {
+                            currentPage--;
+                            displayPage(currentPage);
+                        }
+                    };
+                    document.getElementById('nextPageMobile').onclick = () => {
+                        if (currentPage < totalPages) {
+                            currentPage++;
+                            displayPage(currentPage);
+                        }
+                    };
+                }
+
+                // Function to display a specific page
+                function displayPage(page) {
+                    const startIndex = (page - 1) * itemsPerPage;
+                    const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+                    const pageItems = pageData.slice(startIndex, endIndex);
+
+                    // Update table
+                    tableBody.innerHTML = '';
+                    pageItems.forEach(data => {
+                    const row = document.createElement('tr');
+                    row.className = data.difference > 0 ? 'trend-up' : data.difference < 0 ? 'trend-down' : '';
+
+                    // Get page title from URL
+                    const pageTitle = data.page.split('/').filter(Boolean).pop() || 'Homepage';
+                    const pageDescription = data.page;
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-file-alt text-primary"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">${pageTitle}</div>
+                                    <div class="text-sm text-gray-500 truncate w-48">${pageDescription}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${data.currentClicks.toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${data.previousClicks.toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold ${data.difference > 0 ? 'text-green-600' : data.difference < 0 ? 'text-red-600' : 'text-gray-900'}">
+                            ${data.difference > 0 ? '+' : ''}${data.difference}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                ${data.difference > 0 ? 'bg-green-100 text-green-800' : 
+                                  data.difference < 0 ? 'bg-red-100 text-red-800' : 
+                                  'bg-blue-100 text-blue-800'}">
+                                ${data.difference > 0 ? '+' : ''}${data.percentageChange.toFixed(1)}%
+                            </span>
+                        </td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+
+                    // Update pagination info
+                    document.getElementById('startIndex').textContent = startIndex + 1;
+                    document.getElementById('endIndex').textContent = endIndex;
+                    document.getElementById('totalItems').textContent = totalItems;
+
+                    // Update pagination controls
+                    updatePaginationControls();
+                }
+
+                // Initialize with first page
+                displayPage(1);
+            }
+
+            // Update the top performing pages table when the page loads
+            updateTopPerformingPages();
+        });
+    </script>
+</body>
+</html>

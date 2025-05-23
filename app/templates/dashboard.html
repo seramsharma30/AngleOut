@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Search Console Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add daterangepicker dependencies -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+
+        .chart-container {
+            height: 300px;
+        }
+
+        .grid-stack-item {
+            transition: all 0.3s ease;
+        }
+
+        .grid-stack-item:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .search-input {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z' clip-rule='evenodd' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 0.75rem center;
+            background-size: 1rem;
+        }
+
+        .daterangepicker {
+            font-family: inherit;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .daterangepicker .calendar-table {
+            border: none;
+        }
+
+        .daterangepicker td.active,
+        .daterangepicker td.active:hover {
+            background-color: #2563eb;
+        }
+
+        .daterangepicker .ranges li.active {
+            background-color: #2563eb;
+        }
+
+        .daterangepicker .ranges li:hover {
+            background-color: #e5e7eb;
+        }
+
+        .chart-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            background-color: rgb(243 244 246);
+            color: rgb(55 65 81);
+        }
+
+        .chart-btn:hover {
+            background-color: rgb(229 231 235);
+        }
+
+        .chart-btn.active {
+            background-color: rgb(37 99 235);
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-white w-64 border-r border-gray-200 flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <div class="flex items-center">
+                    <!-- <img src="https://www.gstatic.com/images/branding/product/1x/search_console_48dp.png" alt="Google Search Console" class="h-8 w-8 mr-2"> -->
+                    <span class="text-lg font-medium text-gray-800">Angle Out</span>
+                </div>
+                <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <nav class="p-2">
+                    <div class="mb-4">
+                        <!-- <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Overview
+                        </div> -->
+                        <a href="/dashboard"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md bg-blue-50 text-blue-700">
+                            <i class="fas fa-home mr-3 text-blue-600 group-hover:text-blue-700"></i>
+                            Dashboard
+                        </a>
+                        <a href="/ranktracker"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-chart-line mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Rank Tracker
+                        </a>
+                        <a href="/monthlyreport"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-calendar-alt mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Monthly Report
+                        </a>
+                        <a href="/contentdecay"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-chart-line mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Content Decay
+                        </a>
+                        <a href="#"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-tools mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Tools
+                        </a>
+                    </div>
+
+                </nav>
+            </div>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center">
+                    <img src="{{ profile_pic }}" alt="User" class="h-8 w-8 rounded-full mr-2">
+                    <div>
+                        <div class="text-sm font-medium text-gray-800">{{ user_name }}</div>
+                        <div class="text-xs text-gray-500">{{ user_email}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Top navigation -->
+            <header class="bg-white border-b border-gray-200">
+                <div class="flex items-center justify-end px-6 py-3">
+                    <!-- <div class="flex items-center">
+                        <button class="mr-4 text-gray-500 hover:text-gray-700 md:hidden">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="relative w-96">
+                            <input type="text" placeholder="Search property..." class="search-input pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div> -->
+                    <div class="flex items-center space-x-4 mr-2">
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <a href="/signout" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard content -->
+            <main class="p-6">
+                <!-- Property selector and date range -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                    <form id="dashboardForm" method="POST" action="/dashboard"
+                        class="w-full flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="mb-4 md:mb-0">
+                            <div class="text-sm text-gray-500 mb-1">Property</div>
+                            <div class="flex items-center">
+                                <select id="projects-ids" name="projects-ids"
+                                    class="block w-64 px-4 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 appearance-none">
+                                    {% for each_site in site_list %}
+                                    {% if each_site == selected_property %}
+                                    <option value="{{ each_site }}" selected>{{ each_site }}</option>
+                                    {% else %}
+                                    <option value="{{ each_site }}">{{ each_site }}</option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-500 mb-1">Date Range</div>
+                            <div class="flex items-center space-x-2">
+                                <div id="reportrange"
+                                    class="flex items-center px-4 py-2 text-base border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 cursor-pointer hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <i class="fas fa-calendar mr-2 text-gray-500"></i>
+                                    <span class="flex-grow"></span>
+                                    <i class="fas fa-caret-down ml-2 text-gray-500"></i>
+                                </div>
+                                <input type="hidden" name="startDate" id="startDate" value="{{ start_date }}">
+                                <input type="hidden" name="endDate" id="endDate" value="{{ end_date }}">
+                                <button type="submit"
+                                    class="mr-2 px-3 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Summary cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white px-6 py-4 rounded-lg shadow-sm border border-gray-200 grid-stack-item">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-md text-gray-500">Total clicks</div>
+                                <div class="mt-1 text-2xl font-bold text-gray-800">{{ click_sum }}</div>
+                            </div>
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                                <i class="fas fa-mouse-pointer"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white px-6 py-4 rounded-lg shadow-sm border border-gray-200 grid-stack-item">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-500">Total impressions</div>
+                                <div class="mt-1 text-2xl font-bold text-gray-800">{{ impression_sum }}</div>
+                            </div>
+                            <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white px-6 py-4 rounded-lg shadow-sm border border-gray-200 grid-stack-item">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-500">Average CTR</div>
+                                <div class="mt-1 text-2xl font-bold text-gray-800">{{ ctr_sum }}</div>
+                            </div>
+                            <div class="p-3 rounded-full bg-green-100 text-green-600">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div class="bg-white px-6 py-4 rounded-lg shadow-sm border border-gray-200 grid-stack-item">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-500">Average position</div>
+                                <div class="mt-1 text-2xl font-bold text-gray-800">{{ avg_position }}</div>
+                            </div>
+                            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+
+                <!-- Performance chart -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6 grid-stack-item">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-medium text-gray-800">Performance</h2>
+                        <div class="flex space-x-2" id="chartButtons">
+                            <button class="chart-btn active" data-metric="Clicks">Clicks</button>
+                            <button class="chart-btn" data-metric="Impressions">Impressions</button>
+                            <button class="chart-btn" data-metric="CTR">CTR</button>
+                            <button class="chart-btn" data-metric="Position">Position</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tables -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Top queries -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 grid-stack-item">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-medium text-gray-800">Top queries</h2>
+                            <!-- <a href="/tables?type=queries" class="text-blue-600 text-sm font-medium hover:text-blue-800">View full report</a> -->
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Query</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Clicks</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Impressions</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            CTR</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Position</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="queryTableBody" class="bg-white divide-y divide-gray-200">
+                                    <!-- Table rows will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Top pages -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 grid-stack-item">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-medium text-gray-800">Top pages</h2>
+                            <button class="text-blue-600 text-sm font-medium hover:text-blue-800">View full
+                                report</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Page</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Clicks</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Impressions</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            CTR</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Position</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pageTableBody" class="bg-white divide-y divide-gray-200">
+                                    <!-- Table rows will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Countries and devices -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Countries -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 grid-stack-item">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-medium text-gray-800">Countries</h2>
+                            <button class="text-blue-600 text-sm font-medium hover:text-blue-800">View full
+                                report</button>
+                        </div>
+                        <div class="space-y-4" id="countriesList">
+                            <!-- Country data will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Devices -->
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 grid-stack-item">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-medium text-gray-800">Devices</h2>
+                            <button class="text-blue-600 text-sm font-medium hover:text-blue-800">View full
+                                report</button>
+                        </div>
+                        <div class="flex items-center justify-around mt-6 pt-2" id="devicesList">
+                            <!-- Device data will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Parse the date data from the server
+            const dateData = JSON.parse('{{ tables_data["date_data"] | tojson | safe }}');
+            const dates = Object.values(dateData.DATE);
+            const clicks = Object.values(dateData.Clicks);
+            const impressions = Object.values(dateData.Impressions);
+            const ctr = Object.values(dateData.CTR);
+            const position = Object.values(dateData.Position);
+
+            // Register the crosshair plugin
+            Chart.register({
+                id: 'crosshair',
+                beforeDraw: function (chart) {
+                    if (chart.tooltip._active && chart.tooltip._active.length) {
+                        const activePoint = chart.tooltip._active[0];
+                        const ctx = chart.ctx;
+                        const x = activePoint.element.x;
+                        const topY = chart.scales.y.top;
+                        const bottomY = chart.scales.y.bottom;
+                        const activeDataset = chart.data.datasets[0];
+                        const lineColor = activeDataset.borderColor;
+
+                        // Draw vertical line
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(x, topY);
+                        ctx.lineTo(x, bottomY);
+                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = lineColor.replace(')', ', 0.3)').replace('rgb', 'rgba');
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            });
+
+            // Chart configuration
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            let performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Clicks',
+                        data: clicks,
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.dataset.label === 'CTR') {
+                                        label += context.parsed.y.toFixed(2) + '%';
+                                    } else if (context.dataset.label === 'Position') {
+                                        label += context.parsed.y.toFixed(1);
+                                    } else {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        crosshair: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false,
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    },
+                    hover: {
+                        mode: 'index',
+                        intersect: false
+
+                    }
+                }
+            });
+
+            // Function to update chart based on selected metric
+            function updateChart(metric) {
+                // Update button styles
+                document.querySelectorAll('.chart-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+
+                // Update chart data
+                let data, color, backgroundColor;
+                switch (metric) {
+                    case 'Clicks':
+                        data = clicks;
+                        color = '#3B82F6';
+                        backgroundColor = 'rgba(59, 130, 246, 0.05)';
+                        break;
+                    case 'Impressions':
+                        data = impressions;
+                        color = '#8B5CF6';
+                        backgroundColor = 'rgba(139, 92, 246, 0.05)';
+                        break;
+                    case 'CTR':
+                        data = ctr;
+                        color = '#10B981';
+                        backgroundColor = 'rgba(16, 185, 129, 0.05)';
+                        break;
+                    case 'Position':
+                        data = position;
+                        color = '#F59E0B';
+                        backgroundColor = 'rgba(245, 158, 11, 0.05)';
+                        break;
+                }
+
+                performanceChart.data.datasets[0] = {
+                    label: metric,
+                    data: data,
+                    borderColor: color,
+                    backgroundColor: backgroundColor,
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 4
+                };
+
+                performanceChart.update();
+            }
+
+            // Add click event listeners to buttons
+            document.querySelectorAll('.chart-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    updateChart(this.dataset.metric);
+                });
+            });
+        });
+
+        // Toggle sidebar on mobile
+        document.querySelectorAll('.fa-bars').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('hidden');
+                document.querySelector('.sidebar').classList.toggle('md:flex');
+            });
+        });
+
+        // Add hover effect to grid items
+        document.querySelectorAll('.grid-stack-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                item.classList.add('shadow-lg');
+            });
+            item.addEventListener('mouseleave', () => {
+                item.classList.remove('shadow-lg');
+            });
+        });
+    </script>
+
+
+    <script type="text/javascript">
+        $(function () {
+            var start = moment('{{ start_date }}');
+            var end = moment('{{ end_date }}');
+            var maxDate = moment().subtract(2, 'days').endOf('day');
+
+            function cb(start, end) {
+                $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                $('#startDate').val(start.format('YYYY-MM-DD'));
+                $('#endDate').val(end.format('YYYY-MM-DD'));
+            }
+
+            $('#reportrange').daterangepicker({
+                startDate: start,
+                endDate: end,
+                maxDate: maxDate,
+                ranges: {
+                    'Last 7 Days': [moment().subtract(8, 'days'), maxDate],
+                    'Last 28 Days': [moment().subtract(29, 'days'), maxDate],
+                    'Last 3 Months': [moment().subtract(90, 'days'), maxDate],
+                    'Last 6 Months': [moment().subtract(182, 'days'), maxDate],
+                    'Last 12 Months': [moment().subtract(12, 'months'), maxDate]
+                },
+                alwaysShowCalendars: true,
+                showCustomRangeLabel: true,
+                opens: 'left',
+                drops: 'auto',
+                autoApply: true,
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    applyLabel: 'Apply',
+                    cancelLabel: 'Cancel',
+                    fromLabel: 'From',
+                    toLabel: 'To',
+                    customRangeLabel: 'Custom Range',
+                    daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+                    monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                    firstDay: 1
+                }
+            }, cb);
+
+            cb(start, end);
+
+            // Auto-submit form when property changes
+            $('#projects-ids').change(function () {
+                $('#dashboardForm').submit();
+            });
+
+            // Auto-submit form when date range changes
+            $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
+                // Validate the selected dates
+                var selectedEnd = picker.endDate;
+                if (selectedEnd.isAfter(maxDate)) {
+                    picker.setEndDate(maxDate);
+                }
+                $('#dashboardForm').submit();
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                // Get the raw data string and clean it
+                const rawData = '{{ tables_data["query_data"] | tojson | safe }}';
+
+                // Clean the raw data string by replacing double quotes with single quotes
+                const cleanedData = rawData.replace(/""/g, '"');
+
+                // Parse the query data from the server
+                const queryData = JSON.parse(cleanedData);
+
+                // Convert the data into an array of objects for easier sorting
+                const queryArray = [];
+                for (let i = 0; i < Object.keys(queryData.QUERY).length; i++) {
+                    queryArray.push({
+                        query: queryData.QUERY[i].replace(/^"|"$/g, ''),
+                        clicks: parseInt(queryData.Clicks[i]),
+                        impressions: parseInt(queryData.Impressions[i]),
+                        ctr: parseFloat(queryData.CTR[i]),
+                        position: parseFloat(queryData.Position[i])
+                    });
+                }
+
+                // Sort the array by impressions in descending order
+                queryArray.sort((a, b) => b.impressions - a.impressions);
+
+                // Function to format numbers with commas
+                function formatNumber(num) {
+                    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                }
+
+                // Function to format CTR as percentage
+                function formatCTR(ctr) {
+                    return parseFloat(ctr).toFixed(2) + '%';
+                }
+
+                // Function to format position with one decimal place
+                function formatPosition(pos) {
+                    return parseFloat(pos).toFixed(1);
+                }
+
+                // Get the table body element
+                const tableBody = document.getElementById('queryTableBody');
+
+                // Clear existing rows
+                tableBody.innerHTML = '';
+
+                // Add only first 5 rows to the table
+                queryArray.slice(0, 5).forEach((row, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.query}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(row.clicks)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(row.impressions)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatCTR(row.ctr)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatPosition(row.position)}</td>
+                `;
+                    tableBody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error processing query data:', error);
+                const tableBody = document.getElementById('queryTableBody');
+                tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-sm text-red-500">
+                        Error loading query data. Please try refreshing the page.
+                    </td>
+                </tr>
+            `;
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                // Parse the page data from the server
+                const pageData = JSON.parse('{{ tables_data["page_data"] | tojson | safe }}');
+
+                // Convert the data into an array of objects for easier sorting
+                const pageArray = [];
+                for (let i = 0; i < Object.keys(pageData.PAGE).length; i++) {
+                    pageArray.push({
+                        page: pageData.PAGE[i],
+                        clicks: parseInt(pageData.Clicks[i]),
+                        impressions: parseInt(pageData.Impressions[i]),
+                        ctr: parseFloat(pageData.CTR[i]),
+                        position: parseFloat(pageData.Position[i])
+                    });
+                }
+
+                // Sort the array by clicks in descending order
+                pageArray.sort((a, b) => b.clicks - a.clicks);
+
+                // Function to format numbers with commas
+                function formatNumber(num) {
+                    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                }
+
+                // Function to format CTR as percentage
+                function formatCTR(ctr) {
+                    return parseFloat(ctr).toFixed(2) + '%';
+                }
+
+                // Function to format position with one decimal place
+                function formatPosition(pos) {
+                    return parseFloat(pos).toFixed(1);
+                }
+
+                // Function to format URL for display
+                function formatUrl(url) {
+                    try {
+                        const urlObj = new URL(url);
+                        // Return the full URL if it's the main domain, otherwise return pathname
+                        if (urlObj.pathname === '/' || urlObj.pathname === '') {
+                            return url;
+                        }
+                        return urlObj.origin + urlObj.pathname;
+                    } catch (e) {
+                        return url;
+                    }
+                }
+
+                // Get the table body element
+                const tableBody = document.getElementById('pageTableBody');
+
+                // Clear existing rows
+                tableBody.innerHTML = '';
+
+                // Add only first 5 rows to the table
+                pageArray.slice(0, 5).forEach((row, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <a href="${row.page}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                            ${formatUrl(row.page)}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(row.clicks)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatNumber(row.impressions)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatCTR(row.ctr)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatPosition(row.position)}</td>
+                `;
+                    tableBody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error processing page data:', error);
+                const tableBody = document.getElementById('pageTableBody');
+                tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-sm text-red-500">
+                        Error loading page data. Please try refreshing the page.
+                    </td>
+                </tr>
+            `;
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                // Parse the country data from the server
+                const countryData = JSON.parse('{{ tables_data["country_data"] | tojson | safe }}');
+
+                // Convert the data into an array of objects for easier sorting
+                const countryArray = [];
+                for (let i = 0; i < Object.keys(countryData.COUNTRY).length; i++) {
+                    countryArray.push({
+                        country: countryData.COUNTRY[i],
+                        clicks: parseInt(countryData.Clicks[i]),
+                        impressions: parseInt(countryData.Impressions[i]),
+                        ctr: parseFloat(countryData.CTR[i]),
+                        position: parseFloat(countryData.Position[i])
+                    });
+                }
+
+                // Sort the array by clicks (descending) and then by impressions (descending)
+                countryArray.sort((a, b) => {
+                    if (b.clicks !== a.clicks) {
+                        return b.clicks - a.clicks;
+                    }
+                    return b.impressions - a.impressions;
+                });
+
+                // Function to format country code to full name
+                function getCountryName(countryCode) {
+                    const countryNames = {
+                        'ind': 'India',
+                        'usa': 'United States',
+                        'rus': 'Russia',
+                        'arg': 'Argentina',
+                        'gbr': 'United Kingdom',
+                        'deu': 'Germany',
+                        'fra': 'France',
+                        'ita': 'Italy',
+                        'esp': 'Spain',
+                        'can': 'Canada',
+                        'aus': 'Australia',
+                        'bra': 'Brazil',
+                        'mex': 'Mexico',
+                        'zaf': 'South Africa',
+                        'jpn': 'Japan',
+                        'chn': 'China',
+                        'kor': 'South Korea',
+                        'sgp': 'Singapore',
+                        'mys': 'Malaysia',
+                        'idn': 'Indonesia',
+                        'tha': 'Thailand',
+                        'vnm': 'Vietnam',
+                        'phl': 'Philippines',
+                        'nzl': 'New Zealand',
+                        'are': 'United Arab Emirates',
+                        'sau': 'Saudi Arabia',
+                        'tur': 'Turkey',
+                        'egy': 'Egypt',
+                        'nga': 'Nigeria',
+                        'ken': 'Kenya',
+                        'mar': 'Morocco',
+                        'tza': 'Tanzania',
+                        'gha': 'Ghana',
+                        'eth': 'Ethiopia',
+                        'col': 'Colombia',
+                        'per': 'Peru',
+                        'chl': 'Chile',
+                        'ven': 'Venezuela',
+                        'ury': 'Uruguay',
+                        'prt': 'Portugal',
+                        'nld': 'Netherlands',
+                        'bel': 'Belgium',
+                        'che': 'Switzerland',
+                        'aut': 'Austria',
+                        'swe': 'Sweden',
+                        'nor': 'Norway',
+                        'dnk': 'Denmark',
+                        'fin': 'Finland',
+                        'pol': 'Poland',
+                        'cze': 'Czech Republic',
+                        'hun': 'Hungary',
+                        'rou': 'Romania',
+                        'ukr': 'Ukraine',
+                        'grc': 'Greece',
+                        'isr': 'Israel',
+                        'pak': 'Pakistan',
+                        'bng': 'Bangladesh',
+                        'lka': 'Sri Lanka',
+                        'npl': 'Nepal',
+                        'btn': 'Bhutan',
+                        'mdv': 'Maldives',
+                        'afg': 'Afghanistan',
+                        'irn': 'Iran',
+                        'irq': 'Iraq',
+                        'syr': 'Syria',
+                        'jor': 'Jordan',
+                        'lbn': 'Lebanon',
+                        'qat': 'Qatar',
+                        'kwt': 'Kuwait',
+                        'bhr': 'Bahrain',
+                        'omn': 'Oman',
+                        'yem': 'Yemen'
+                    };
+                    return countryNames[countryCode.toLowerCase()] || countryCode.toUpperCase();
+                }
+
+                // Function to format numbers with commas
+                function formatNumber(num) {
+                    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                }
+
+                // Function to format CTR as percentage
+                function formatCTR(ctr) {
+                    return parseFloat(ctr).toFixed(2) + '%';
+                }
+
+                // Calculate total impressions for percentage
+                const totalClicks = countryArray.reduce((sum, country) => sum + country.clicks, 0);
+
+                // Get the countries list element
+                const countriesList = document.getElementById('countriesList');
+
+                // Clear existing content
+                countriesList.innerHTML = '';
+
+                // Add only first 5 countries to the list
+                countryArray.slice(0, 5).forEach((country, index) => {
+                    const percentage = ((country.clicks / totalClicks) * 100).toFixed(1);
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+            <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>${getCountryName(country.country)}</span>
+                            <span>${formatNumber(country.clicks)} (${percentage}%)</span>
+              </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: ${percentage}%"></div>
+            </div>
+            </div>
+                `;
+                    countriesList.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error processing country data:', error);
+                const countriesList = document.getElementById('countriesList');
+                countriesList.innerHTML = `
+                <div class="text-center text-sm text-red-500">
+                    Error loading country data. Please try refreshing the page.
+          </div>
+            `;
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                // Parse the device data from the server
+                const deviceData = JSON.parse('{{ tables_data["device_data"] | tojson | safe }}');
+
+                // Initialize device data with default values
+                const devices = {
+                    'DESKTOP': { clicks: 0, impressions: 0, icon: 'desktop', color: 'purple' },
+                    'MOBILE': { clicks: 0, impressions: 0, icon: 'mobile-alt', color: 'blue' },
+                    'TABLET': { clicks: 0, impressions: 0, icon: 'tablet', color: 'green' }
+                };
+
+                // Process the data and update device values
+                for (let i = 0; i < Object.keys(deviceData.DEVICE).length; i++) {
+                    const device = deviceData.DEVICE[i].toUpperCase();
+                    if (devices[device]) {
+                        devices[device].clicks = parseInt(deviceData.Clicks[i]);
+                        devices[device].impressions = parseInt(deviceData.Impressions[i]);
+                    }
+                }
+
+                // Calculate total clicks for percentage
+                const totalClicks = Object.values(devices).reduce((sum, device) => sum + device.clicks, 0);
+
+                // Function to format numbers with commas
+                function formatNumber(num) {
+                    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                }
+
+                // Get the devices list element
+                const devicesList = document.getElementById('devicesList');
+
+                // Clear existing content
+                devicesList.innerHTML = '';
+
+                // Add device elements
+                Object.entries(devices).forEach(([device, data]) => {
+                    const percentage = totalClicks > 0 ? ((data.clicks / totalClicks) * 100).toFixed(1) : '0.0';
+                    const div = document.createElement('div');
+                    div.className = 'text-center';
+                    div.innerHTML = `
+                    <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-${data.color}-100 flex items-center justify-center">
+                        <i class="fas fa-${data.icon} text-${data.color}-600 text-xl"></i>
+          </div>
+                    <div class="text-sm font-medium">${device.charAt(0) + device.slice(1).toLowerCase()}</div>
+                    <div class="text-2xl font-bold">${formatNumber(data.clicks)}</div>
+                    <div class="text-xs text-gray-500">(${percentage}%)</div>
+                `;
+                    devicesList.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error processing device data:', error);
+                const devicesList = document.getElementById('devicesList');
+                devicesList.innerHTML = `
+                <div class="text-center text-sm text-red-500">
+                    Error loading device data. Please try refreshing the page.
+              </div>
+            `;
+            }
+        });
+    </script>
+
+    <script>
+        // Remove the old signout event listener and use direct link
+        // The link will handle the redirect automatically
+    </script>
+</body>
+
+</html>

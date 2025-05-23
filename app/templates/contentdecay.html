@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Content Decay Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'seo-green': '#10b981',
+                        'seo-red': '#ef4444',
+                        'seo-blue': '#3b82f6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .traffic-cell {
+            transition: all 0.3s ease;
+        }
+        
+        .traffic-cell:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-white w-64 border-r border-gray-200 flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <div class="flex items-center">
+                    <span class="text-lg font-medium text-gray-800">Angle Out</span>
+                </div>
+                <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <nav class="p-2">
+                    <div class="mb-4">
+                        <a href="/dashboard" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-home mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Dashboard
+                        </a>
+                        <a href="/ranktracker" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-chart-line mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Rank Tracker
+                        </a>
+                        <a href="/monthlyreport" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-calendar-alt mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Monthly Report
+                        </a>
+                        <a href="/contentdecay" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md bg-blue-50 text-blue-700">
+                            <i class="fas fa-chart-line mr-3 text-blue-600 group-hover:text-blue-700"></i>
+                            Content Decay
+                        </a>
+                        <a href="#" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-tools mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Tools
+                        </a>
+                    </div>
+                </nav>
+            </div>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center">
+                    <img src="{{ profile_pic }}" alt="User" class="h-8 w-8 rounded-full mr-2">
+                    <div>
+                        <div class="text-sm font-medium text-gray-800">{{ user_name }}</div>
+                        <div class="text-xs text-gray-500">{{ user_email}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Top navigation -->
+            <header class="bg-white border-b border-gray-200">
+                <div class="flex items-center justify-end px-6 py-3">
+                    <div class="flex items-center space-x-4 mr-2">
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <a href="/signout" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Decay Dashboard content -->
+            <div class="min-h-screen">
+                <!-- Header -->
+                <header class="bg-white shadow-sm">
+                    <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                        <form id="contentDecayForm" method="POST" action="/contentdecay" class="w-full flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="relative">
+                                    <select id="projects-ids" name="projects-ids" 
+                                        class="block w-64 px-4 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 appearance-none"
+                                        onchange="this.form.submit()">
+                                        {% for each_site in site_list %}
+                                            {% if each_site == selected_property %}
+                                            <option value="{{ each_site }}" selected>{{ each_site }}</option>
+                                            {% else %}
+                                            <option value="{{ each_site }}">{{ each_site }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="relative">
+                                    <select name="date-range" class="appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-seo-blue"
+                                        onchange="this.form.submit()">
+                                        <option value="2" {% if selected_range == "2" %}selected{% endif %}>Last 3 Months</option>
+                                        <option value="5" {% if selected_range == "5" %}selected{% endif %}>Last 6 Months</option>
+                                        <option value="8" {% if selected_range == "8" %}selected{% endif %}>Last 9 Months</option>
+                                        <option value="11" {% if selected_range == "11" %}selected{% endif %}>Last 12 Months</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down absolute right-3 top-2.5 text-gray-500 text-xs"></i>
+                                </div>
+                                <button type="submit" class="bg-seo-blue hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
+                                    <i class="fas fa-sync-alt mr-2"></i> Refresh
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </header>
+
+                <!-- Summary Cards -->
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div id="total-urls-card" class="bg-white rounded-lg shadow p-6 fade-in">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Total URLs</p>
+                                    <p id="total-urls-value" name="total-urls" class="text-2xl font-semibold text-gray-900">0</p>
+                                </div>
+                                <div class="bg-seo-blue bg-opacity-10 p-3 rounded-full">
+                                    <i class="fas fa-link text-seo-blue text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="decaying-content-card" class="bg-white rounded-lg shadow p-6 fade-in">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Decaying Content</p>
+                                    <p id="decaying-content-value" name="decaying-content" class="text-2xl font-semibold text-seo-red">0</p>
+                                </div>
+                                <div class="bg-seo-red bg-opacity-10 p-3 rounded-full">
+                                    <i class="fas fa-arrow-down text-seo-red text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="growing-content-card" class="bg-white rounded-lg shadow p-6 fade-in">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Growing Content</p>
+                                    <p id="growing-content-value" name="growing-content" class="text-2xl font-semibold text-seo-green">0</p>
+                                </div>
+                                <div class="bg-seo-green bg-opacity-10 p-3 rounded-full">
+                                    <i class="fas fa-arrow-up text-seo-green text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="stable-content-card" class="bg-white rounded-lg shadow p-6 fade-in">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Stable Content</p>
+                                    <p id="stable-content-value" name="stable-content" class="text-2xl font-semibold text-gray-900">0</p>
+                                </div>
+                                <div class="bg-gray-200 bg-opacity-10 p-3 rounded-full">
+                                    <i class="fas fa-equals text-gray-500 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 mb-10">
+                    <div class="bg-white shadow rounded-lg overflow-hidden">
+                        <!-- Table Header -->
+                        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <h2 class="text-lg font-medium text-gray-900">Content Performance</h2>
+                            <div class="relative w-64">
+                                <input type="text" placeholder="Search URLs..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-seo-blue">
+                                <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Table -->
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">November 2023</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">December 2023</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">January 2024</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">February 2024</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">March 2024</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">April 2024</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">May 2024</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="urlTableBody">
+                                    <!-- Table rows will be inserted here by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                            <div class="flex-1 flex justify-between sm:hidden">
+                                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"> Previous </a>
+                                <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"> Next </a>
+                            </div>
+                            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-700">
+                                        Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">247</span> results
+                                    </p>
+                                </div>
+                                <div>
+                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <span class="sr-only">Previous</span>
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                        <a href="#" aria-current="page" class="z-10 bg-seo-blue border-seo-blue text-white relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 1 </a>
+                                        <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 2 </a>
+                                        <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 3 </a>
+                                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <span class="sr-only">Next</span>
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden element to store tables_data -->
+    <script id="tables-data" type="application/json">
+        {{ tables_data | tojson | safe }}
+    </script>
+
+    <script>
+        // Get tables_data from the data attribute
+        const tables_data = JSON.parse(document.getElementById('tables-data').textContent);
+        console.log('Initial tables_data:', tables_data);
+        
+        // Pagination state
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let totalRows = 0;
+        let processedData = [];
+        
+        // Process the data from tables_data
+        function processData(tablesData) {
+            console.log('Processing data:', tablesData);
+            const pageData = {};
+            
+            // Get all unique pages
+            const pages = [...new Set(Object.values(tablesData['PAGE']))];
+            console.log('Unique pages:', pages);
+            
+            // Initialize data structure for each page
+            pages.forEach(page => {
+                pageData[page] = {
+                    url: page,
+                    monthlyClicks: {},
+                    totalClicks: 0
+                };
+            });
+            
+            // Process each row of data
+            Object.keys(tablesData['PAGE']).forEach(index => {
+                const page = tablesData['PAGE'][index];
+                const date = new Date(tablesData['DATE'][index]);
+                const clicks = parseInt(tablesData['Clicks'][index]) || 0;
+                
+                // Format date to YYYY-MM
+                const monthKey = date.toISOString().slice(0, 7);
+                
+                // Add clicks to the corresponding month
+                if (!pageData[page].monthlyClicks[monthKey]) {
+                    pageData[page].monthlyClicks[monthKey] = 0;
+                }
+                pageData[page].monthlyClicks[monthKey] += clicks;
+                pageData[page].totalClicks += clicks;
+            });
+            
+            console.log('Processed page data:', pageData);
+            
+            // Convert to array and sort by total clicks
+            const sortedData = Object.values(pageData).sort((a, b) => b.totalClicks - a.totalClicks);
+            console.log('Sorted data:', sortedData);
+            return sortedData;
+        }
+
+        // Function to get month labels
+        function getMonthLabels(months) {
+            const labels = [];
+            const currentDate = new Date();
+            
+            for (let i = months - 1; i >= 0; i--) {
+                const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+                labels.push(date.toISOString().slice(0, 7)); // Store as YYYY-MM for easier comparison
+            }
+            
+            console.log('Month labels:', labels);
+            return labels;
+        }
+
+        // Function to update pagination controls
+        function updatePagination() {
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+            const paginationContainer = document.querySelector('.hidden.sm\\:flex-1');
+            
+            // Update the "Showing X to Y of Z results" text
+            const startRow = (currentPage - 1) * rowsPerPage + 1;
+            const endRow = Math.min(currentPage * rowsPerPage, totalRows);
+            paginationContainer.querySelector('p').innerHTML = `
+                Showing <span class="font-medium">${startRow}</span> to <span class="font-medium">${endRow}</span> of <span class="font-medium">${totalRows}</span> results
+            `;
+            
+            // Update pagination buttons
+            const paginationNav = paginationContainer.querySelector('nav');
+            let paginationHTML = `
+                <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}" 
+                   onclick="return ${currentPage > 1 ? 'changePage(' + (currentPage - 1) + ')' : 'false'}">
+                    <span class="sr-only">Previous</span>
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            `;
+            
+            // Add page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    paginationHTML += `
+                        <a href="#" class="relative inline-flex items-center px-4 py-2 border text-sm font-medium ${i === currentPage ? 'z-10 bg-seo-blue border-seo-blue text-white' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}"
+                           onclick="return changePage(${i})">${i}</a>
+                    `;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    paginationHTML += `
+                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                    `;
+                }
+            }
+            
+            paginationHTML += `
+                <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}"
+                   onclick="return ${currentPage < totalPages ? 'changePage(' + (currentPage + 1) + ')' : 'false'}">
+                    <span class="sr-only">Next</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            `;
+            
+            paginationNav.innerHTML = paginationHTML;
+        }
+
+        // Function to change page
+        function changePage(page) {
+            currentPage = page;
+            populateTable();
+            return false; // Prevent default link behavior
+        }
+
+        // Function to populate the table
+        function populateTable() {
+            console.log('Starting table population');
+            const tableBody = document.getElementById('urlTableBody');
+            const tableHead = document.querySelector('thead tr');
+            tableBody.innerHTML = '';
+            
+            try {
+                // Get the processed data if not already processed
+                if (!processedData.length) {
+                    processedData = processData(tables_data);
+                }
+                totalRows = processedData.length;
+                
+                // Get month labels based on selected range
+                const selectedRange = document.querySelector('select[name="date-range"]').value;
+                const monthLabels = getMonthLabels(parseInt(selectedRange) + 1);
+                
+                // Update table headers
+                tableHead.innerHTML = `
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
+                    ${monthLabels.map(month => `
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">${new Date(month).toLocaleString('default', { month: 'long', year: 'numeric' })}</th>
+                    `).join('')}
+                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                `;
+                
+                // Calculate start and end indices for current page
+                const startIndex = (currentPage - 1) * rowsPerPage;
+                const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
+                
+                // Populate table rows for current page
+                for (let i = startIndex; i < endIndex; i++) {
+                    const item = processedData[i];
+                    console.log(`Processing row ${i}:`, item);
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 fade-in';
+                    
+                    // URL column
+                    const urlCell = document.createElement('td');
+                    urlCell.className = 'px-6 py-4 whitespace-nowrap text-sm font-medium text-seo-blue max-w-[350px]';
+                    const urlLink = document.createElement('a');
+                    urlLink.href = item.url;
+                    urlLink.target = '_blank';
+                    urlLink.className = 'hover:underline truncate block';
+                    urlLink.textContent = item.url;
+                    urlCell.appendChild(urlLink);
+                    row.appendChild(urlCell);
+                    
+                    // Monthly clicks columns
+                    const monthlyValues = [];
+                    monthLabels.forEach(month => {
+                        const clicks = item.monthlyClicks[month] || 0;
+                        monthlyValues.push(clicks);
+                        
+                        const trafficCell = document.createElement('td');
+                        trafficCell.className = 'px-6 py-4 whitespace-nowrap text-center text-sm traffic-cell';
+                        
+                        const trafficValue = document.createElement('div');
+                        trafficValue.className = 'font-medium';
+                        trafficValue.textContent = clicks.toLocaleString();
+                        
+                        // Add comparison indicator if not the first month
+                        if (monthlyValues.length > 1) {
+                            const prevClicks = monthlyValues[monthlyValues.length - 2];
+                            if (prevClicks > 0) {
+                                const diff = clicks - prevClicks;
+                                const percentage = Math.round((Math.abs(diff) / prevClicks) * 100);
+                                
+                                const indicator = document.createElement('div');
+                                indicator.className = 'text-xs mt-1';
+                                
+                                if (diff > 0) {
+                                    indicator.innerHTML = `<span class="text-seo-green"><i class="fas fa-arrow-up mr-1"></i>+${percentage}%</span>`;
+                                    trafficCell.classList.add('bg-green-50');
+                                } else if (diff < 0) {
+                                    indicator.innerHTML = `<span class="text-seo-red"><i class="fas fa-arrow-down mr-1"></i>-${percentage}%</span>`;
+                                    trafficCell.classList.add('bg-red-50');
+                                } else {
+                                    indicator.innerHTML = `<span class="text-gray-500"><i class="fas fa-equals mr-1"></i>0%</span>`;
+                                }
+                                
+                                trafficValue.appendChild(indicator);
+                            }
+                        }
+                        
+                        trafficCell.appendChild(trafficValue);
+                        row.appendChild(trafficCell);
+                    });
+                    
+                    // Status column
+                    const statusCell = document.createElement('td');
+                    statusCell.className = 'px-6 py-4 whitespace-nowrap text-center text-sm';
+                    
+                    const statusPill = document.createElement('span');
+                    statusPill.className = 'px-3 py-1 rounded-full text-xs font-medium';
+                    
+                    // Determine status based on trend
+                    const firstValue = monthlyValues[0];
+                    const lastValue = monthlyValues[monthlyValues.length - 1];
+                    const percentChange = firstValue > 0 ? ((lastValue - firstValue) / firstValue) * 100 : 0;
+                    
+                    if (percentChange > 10) {
+                        statusPill.classList.add('bg-green-100', 'text-seo-green');
+                        statusPill.textContent = 'Growing';
+                    } else if (percentChange < -10) {
+                        statusPill.classList.add('bg-red-100', 'text-seo-red');
+                        statusPill.textContent = 'Decaying';
+                    } else {
+                        statusPill.classList.add('bg-gray-100', 'text-gray-800');
+                        statusPill.textContent = 'Stable';
+                    }
+                    
+                    statusCell.appendChild(statusPill);
+                    row.appendChild(statusCell);
+                    
+                    tableBody.appendChild(row);
+                }
+                
+                // Update pagination controls
+                updatePagination();
+                
+                // Update summary cards
+                updateSummaryCards(processedData);
+                
+            } catch (error) {
+                console.error('Error populating table:', error);
+            }
+        }
+
+        // Function to update summary cards
+        function updateSummaryCards(data) {
+            const totalUrls = data.length;
+            let decaying = 0;
+            let growing = 0;
+            let stable = 0;
+            
+            data.forEach(item => {
+                const monthlyValues = Object.values(item.monthlyClicks);
+                const firstValue = monthlyValues[0];
+                const lastValue = monthlyValues[monthlyValues.length - 1];
+                const percentChange = ((lastValue - firstValue) / firstValue) * 100;
+                
+                if (percentChange > 10) {
+                    growing++;
+                } else if (percentChange < -10) {
+                    decaying++;
+                } else {
+                    stable++;
+                }
+            });
+            
+            // Update the numbers in the cards using IDs
+            document.getElementById('total-urls-value').textContent = totalUrls;
+            console.log('Total URLs:', totalUrls);
+            document.getElementById('decaying-content-value').textContent = decaying;
+            document.getElementById('growing-content-value').textContent = growing;
+            document.getElementById('stable-content-value').textContent = stable;
+        }
+
+        // Initialize the table when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing table');
+            populateTable();
+            
+            // Add animation to summary cards
+            const cards = document.querySelectorAll('.fade-in');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Add pulse animation to decaying content card
+            const decayingCard = document.querySelector('.bg-seo-red');
+            decayingCard.classList.add('pulse');
+        });
+    </script>
+</body>
+</html>

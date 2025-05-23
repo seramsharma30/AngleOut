@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Search Console Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add daterangepicker dependencies -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .chart-container {
+            height: 300px;
+        }
+        .grid-stack-item {
+            transition: all 0.3s ease;
+        }
+        .grid-stack-item:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+        .search-input {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z' clip-rule='evenodd' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 0.75rem center;
+            background-size: 1rem;
+        }
+        .daterangepicker {
+            font-family: inherit;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .daterangepicker .calendar-table {
+            border: none;
+        }
+        .daterangepicker td.active, .daterangepicker td.active:hover {
+            background-color: #2563eb;
+        }
+        .daterangepicker .ranges li.active {
+            background-color: #2563eb;
+        }
+        .daterangepicker .ranges li:hover {
+            background-color: #e5e7eb;
+        }
+        .chart-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            background-color: rgb(243 244 246);
+            color: rgb(55 65 81);
+        }
+        .chart-btn:hover {
+            background-color: rgb(229 231 235);
+        }
+        .chart-btn.active {
+            background-color: rgb(37 99 235);
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-white w-64 border-r border-gray-200 flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <div class="flex items-center">
+                    <!-- <img src="https://www.gstatic.com/images/branding/product/1x/search_console_48dp.png" alt="Google Search Console" class="h-8 w-8 mr-2"> -->
+                    <span class="text-lg font-medium text-gray-800">Angle Out</span>
+                </div>
+                <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <nav class="p-2">
+                    <div class="mb-4">
+                        <!-- <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Overview
+                        </div> -->
+                        <a href="/dashboard" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-home mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Dashboard
+                        </a>
+                        <a href="/ranktracker" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md bg-blue-50 text-blue-700">
+                            <i class="fas fa-chart-line mr-3 text-blue-600 group-hover:text-blue-700"></i>
+                            Rank Tracker
+                        </a>
+                        <a href="/monthlyreport" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-calendar-alt mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Monthly Report
+                        </a>
+                        <a href="/contentdecay" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-chart-line mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Content Decay
+                        </a>
+                        <a href="#" class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-tools mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Tools
+                        </a>
+                    </div>
+
+                </nav>
+            </div>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center">
+                    <img src="{{ profile_pic }}" alt="User" class="h-8 w-8 rounded-full mr-2">
+                    <div>
+                        <div class="text-sm font-medium text-gray-800">{{ user_name }}</div>
+                        <div class="text-xs text-gray-500">{{ user_email}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Top navigation -->
+            <header class="bg-white border-b border-gray-200">
+                <div class="flex items-center justify-end px-6 py-3">
+                    <!-- <div class="flex items-center">
+                        <button class="mr-4 text-gray-500 hover:text-gray-700 md:hidden">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="relative w-96">
+                            <input type="text" placeholder="Search property..." class="search-input pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div> -->
+                    <div class="flex items-center space-x-4 mr-2">
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <a href="/signout" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <!-- Project Selector -->
+                <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+                    <form id="ranktrackerform" method="POST" action="/ranktracker">
+                        <h2 class="text-lg font-medium mb-4">My Website</h2>
+                        <div class="px-4 pb-2">
+                            <div class="flex items-center justify-between">
+                                <select id="projects-ids" name="projects-ids" 
+                                    class="block w-64 px-4 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 appearance-none">
+                                    {% for each_site in site_list %}
+                                        {% if each_site == selected_property %}
+                                        <option value="{{ each_site }}" selected>{{ each_site }}</option>
+                                        {% else %}
+                                        <option value="{{ each_site }}">{{ each_site }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <div class="flex ml-1 items-center space-x-2">
+                                    <div class="relative">
+                                        <select id="date-range" name="date-range" class="appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="7" {% if selected_range == "7" %}selected{% endif %}>Last 7 days</option>
+                                            <option value="28" {% if selected_range == "28" %}selected{% endif %} >Last 28 days</option>
+                                            <option value="90" {% if selected_range == "90" %}selected{% endif %} >Last 90 days</option>
+                                            <!-- <option value="custom" >Custom range</option> -->
+                                        </select>
+                                        <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-500 text-xs"></i>
+                                    </div>
+                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm flex items-center">
+                                        <i class="fas fa-sync-alt mr-2"></i> Refresh
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Avg Position</p>
+                                <h3 id="avgPosition" class="text-2xl font-semibold mt-1">0</h3>
+                            </div>
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Top 3 Positions</p>
+                                <h3 id="top3Positions" class="text-2xl font-semibold mt-1">0</h3>
+                            </div>
+                            <div class="p-3 rounded-full bg-green-100 text-green-600">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Top 10 Positions</p>
+                                <h3 id="top10Positions" class="text-2xl font-semibold mt-1">0</h3>
+                            </div>
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Top 30 Positions</p>
+                                <h3 id="top30Positions" class="text-2xl font-semibold mt-1">0</h3>
+                            </div>
+                            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                                <i class="fas fa-award"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Top 100 Positions</p>
+                                <h3 id="top100Positions" class="text-2xl font-semibold mt-1">0</h3>
+                            </div>
+                            <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Add Keywords Section -->
+                <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+                    <h3 class="text-lg font-medium mb-4">Add Keywords to Track</h3>
+                    <form method="POST" action="{{ url_for('ranktracker') }}" class="keyword-input flex items-center border border-gray-300 rounded-md overflow-hidden">
+                        <input type="text" name="keywords" placeholder="Enter keywords separated by commas" class="flex-1 py-2 px-4 focus:outline-none">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4">
+                            <i class="fas fa-plus mr-2"></i> Add Keywords
+                        </button>
+                    </form>
+                    <!-- <div class="mt-3 text-sm text-gray-500">
+                        <p>You can also <a href="#" class="text-blue-600 hover:underline">import keywords from Google Search Console</a> or <a href="#" class="text-blue-600 hover:underline">upload a CSV file</a>.</p>
+                    </div> -->
+                </div>
+                
+                <!-- Keyword Performance -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                        <h3 class="text-lg font-medium">Keyword Performance</h3>
+                        <div class="flex items-center space-x-2">
+                            <button class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                            <button class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keyword</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Position</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Previous Position</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Page</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Impression Change</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keywordTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Table body will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            Showing <span class="font-medium">1</span> to <span id="totalKeywords" class="font-medium">0</span> of <span id="totalKeywordsCount" class="font-medium">0</span> keywords
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-medium">Average Position Trend</h3>
+                            <div class="flex items-center space-x-2">
+                                <button class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="positionChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-medium">Top Pages by Position</h3>
+                            <div class="flex items-center space-x-2">
+                                <button class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="pagesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Alerts -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div class="border-b border-gray-200 px-6 py-4">
+                        <h3 class="text-lg font-medium">Recent Alerts</h3>
+                    </div>
+                    
+                    <div class="divide-y divide-gray-200">
+                        <div class="px-6 py-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 mt-1">
+                                    <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                                        <i class="fas fa-exclamation text-red-600"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium">Position drop detected</p>
+                                    <p class="text-sm text-gray-500">Keyword "google search console" dropped from position 9 to 12</p>
+                                    <p class="text-xs text-gray-400 mt-1">2 hours ago</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="px-6 py-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 mt-1">
+                                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                                        <i class="fas fa-arrow-up text-green-600"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium">Position improvement</p>
+                                    <p class="text-sm text-gray-500">Keyword "best seo tools" improved from position 5 to 3</p>
+                                    <p class="text-xs text-gray-400 mt-1">1 day ago</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="px-6 py-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 mt-1">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <i class="fas fa-plus text-blue-600"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium">New keyword added</p>
+                                    <p class="text-sm text-gray-500">Keyword "seo audit checklist" added to tracking</p>
+                                    <p class="text-xs text-gray-400 mt-1">2 days ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="px-6 py-3 bg-gray-50 border-t border-gray-200 text-center">
+                        <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                            View all alerts
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+
+    
+    <script type="text/javascript">
+    $(function() {
+        // Auto-submit form when property changes
+        $('#projects-ids').change(function() {
+            $('#ranktrackerform').submit();
+        });
+
+        // Auto-submit form when date range changes
+        $('#date-range').change(function() {
+            $('#ranktrackerform').submit();
+        });
+    });
+    </script>
+
+    
+
+    <script>
+        // Function to find the best page index (lowest position) for a keyword
+        function findBestPageIndex(data) {
+            if (Object.keys(data.cur.Position).length === 1) {
+                return '0';
+            }
+            
+            let bestPosition = 999;
+            let bestIndex = '0';
+            
+            for (const idx in data.cur.Position) {
+                if (data.cur.Position[idx] < bestPosition) {
+                    bestPosition = data.cur.Position[idx];
+                    bestIndex = idx;
+                }
+            }
+            
+            return bestIndex;
+        }
+
+        // Function to format number to 1 decimal place
+        function formatNumber(num) {
+            return Number(num).toFixed(1);
+        }
+
+        // Function to get position color class
+        function getPositionColorClass(position) {
+            if (position === 0) return 'bg-gray-100 text-gray-800';
+            if (position <= 3) return 'bg-green-100 text-green-800';
+            if (position <= 10) return 'bg-blue-100 text-blue-800';
+            if (position <= 30) return 'bg-yellow-100 text-yellow-800';
+            if (position <= 100) return 'bg-purple-100 text-purple-800';
+            return 'bg-red-100 text-red-800';
+        }
+
+        // Function to get change color class
+        function getChangeColorClass(curPosition, prePosition) {
+            if (curPosition === 0 && prePosition > 0) return 'text-red-600'; // Decreased
+            if (curPosition > 0 && prePosition === 0) return 'text-green-600'; // Increased
+            if (curPosition > prePosition) return 'text-red-600'; // Decreased
+            if (curPosition < prePosition) return 'text-green-600'; // Increased
+            return 'text-blue-600'; // No change
+        }
+
+        // Function to get change icon
+        function getChangeIcon(curPosition, prePosition) {
+            if (curPosition === 0 && prePosition > 0) return '<i class="fas fa-arrow-down mr-1"></i>'; // Decreased
+            if (curPosition > 0 && prePosition === 0) return '<i class="fas fa-arrow-up mr-1"></i>'; // Increased
+            if (curPosition > prePosition) return '<i class="fas fa-arrow-down mr-1"></i>'; // Decreased
+            if (curPosition < prePosition) return '<i class="fas fa-arrow-up mr-1"></i>'; // Increased
+            return '<i class="fas fa-minus mr-1"></i>'; // No change
+        }
+
+        // Function to calculate position change
+        function calculatePositionChange(curPosition, prePosition) {
+            if (curPosition === 0 && prePosition > 0) return prePosition; // Decreased
+            if (curPosition > 0 && prePosition === 0) return curPosition; // Increased
+            if (curPosition > prePosition) return curPosition - prePosition; // Decreased
+            if (curPosition < prePosition) return prePosition - curPosition; // Increased
+            return 0; // No change
+        }
+
+        // Function to calculate position statistics
+        function calculatePositionStats(tablesData) {
+            if (!tablesData || Object.keys(tablesData).length === 0) {
+                // Update the stats cards with dashes
+                document.getElementById('avgPosition').textContent = '-';
+                document.getElementById('top3Positions').textContent = '-';
+                document.getElementById('top10Positions').textContent = '-';
+                document.getElementById('top30Positions').textContent = '-';
+                document.getElementById('top100Positions').textContent = '-';
+                return;
+            }
+
+            let totalPosition = 0;
+            let validPositionCount = 0;
+            let top3Count = 0;
+            let top10Count = 0;
+            let top30Count = 0;
+            let top100Count = 0;
+
+            for (const data of Object.values(tablesData)) {
+                const bestPageIndex = findBestPageIndex(data);
+                const position = data.cur.Position[bestPageIndex];
+                
+                // Only include non-NaN positions in the average calculation
+                if (!isNaN(position)) {
+                    totalPosition += position;
+                    validPositionCount++;
+                    
+                    if (position <= 3) top3Count++;
+                    if (position <= 10) top10Count++;
+                    if (position <= 30) top30Count++;
+                    if (position <= 100) top100Count++;
+                }
+            }
+
+            const avgPosition = validPositionCount > 0 ? totalPosition / validPositionCount : 0;
+
+            // Update the stats cards
+            document.getElementById('avgPosition').textContent = formatNumber(avgPosition);
+            document.getElementById('top3Positions').textContent = top3Count;
+            document.getElementById('top10Positions').textContent = top10Count;
+            document.getElementById('top30Positions').textContent = top30Count;
+            document.getElementById('top100Positions').textContent = top100Count;
+        }
+
+        // Function to populate the table
+        function populateKeywordTable(tablesData) {
+            const tableBody = document.getElementById('keywordTableBody');
+            tableBody.innerHTML = '';
+            
+            if (!tablesData || Object.keys(tablesData).length === 0) {
+                // Display message when no data
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                        <div class="flex flex-col items-center">
+                            <i class="fas fa-key text-4xl mb-2 text-gray-400"></i>
+                            <p class="text-lg font-medium">Add Keywords to maintain tracking</p>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+                
+                // Update the total keywords count
+                document.getElementById('totalKeywords').textContent = '0';
+                document.getElementById('totalKeywordsCount').textContent = '0';
+                
+                // Update charts with empty state
+                updateChartsEmptyState();
+                return;
+            }
+            
+            // Convert tablesData to array for sorting
+            const sortedData = Object.entries(tablesData).map(([keyword, data]) => {
+                const bestPageIndex = findBestPageIndex(data);
+                const curPosition = isNaN(data.cur.Position[bestPageIndex]) ? 0 : data.cur.Position[bestPageIndex];
+                return { keyword, data, curPosition };
+            });
+
+            // Sort the data
+            sortedData.sort((a, b) => {
+                // If either position is 0, handle special cases
+                if (a.curPosition === 0 && b.curPosition === 0) {
+                    return a.keyword.localeCompare(b.keyword); // Both 0, sort by keyword
+                }
+                if (a.curPosition === 0) return 1; // Move a to end
+                if (b.curPosition === 0) return -1; // Move b to end
+                
+                // If positions are different, sort by position
+                if (a.curPosition !== b.curPosition) {
+                    return a.curPosition - b.curPosition;
+                }
+                
+                // If positions are same, sort by keyword
+                return a.keyword.localeCompare(b.keyword);
+            });
+            
+            let totalKeywords = 0;
+            
+            // Create table rows with sorted data
+            for (const { keyword, data } of sortedData) {
+                const bestPageIndex = findBestPageIndex(data);
+                
+                const curPosition = isNaN(data.cur.Position[bestPageIndex]) ? 0 : data.cur.Position[bestPageIndex];
+                const prePosition = isNaN(data.pre.Position[bestPageIndex]) ? 0 : data.pre.Position[bestPageIndex];
+                const positionChange = calculatePositionChange(curPosition, prePosition);
+                
+                const curImpressions = isNaN(data.cur.Impressions[bestPageIndex]) ? 0 : data.cur.Impressions[bestPageIndex];
+                const preImpressions = isNaN(data.pre.Impressions[bestPageIndex]) ? 0 : data.pre.Impressions[bestPageIndex];
+                const impressionChange = preImpressions - curImpressions;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="font-medium">${keyword}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPositionColorClass(curPosition)}">
+                            ${formatNumber(curPosition)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${formatNumber(prePosition)}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center ${getChangeColorClass(curPosition, prePosition)}">
+                            ${getChangeIcon(curPosition, prePosition)}
+                            ${formatNumber(positionChange)}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${data.cur.page[bestPageIndex] ? 
+                            `<a href="${data.cur.page[bestPageIndex]}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                ${data.cur.page[bestPageIndex]}
+                            </a>` : 
+                            `<span class="text-gray-500">-</span>`
+                        }
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-xs text-gray-500">
+                            ${(curImpressions === 0 && preImpressions === 0) ? 
+                                `<span class="text-blue-600">0</span>` :
+                                impressionChange !== 0 ? 
+                                    `<span class="${impressionChange < 0 ? 'text-green-600' : 'text-red-600'}">
+                                        ${impressionChange < 0 ? '+' : '-'}${Math.abs(impressionChange)}
+                                    </span>` : 
+                                    `<span class="text-blue-600">0</span>`
+                            }
+                        </div>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+                totalKeywords++;
+            }
+            
+            // Update the total keywords count
+            document.getElementById('totalKeywords').textContent = totalKeywords;
+            document.getElementById('totalKeywordsCount').textContent = totalKeywords;
+            
+            // Calculate and update position statistics
+            calculatePositionStats(tablesData);
+        }
+
+        // Function to update charts with empty state
+        function updateChartsEmptyState() {
+            // Position Trend Chart
+            const positionCtx = document.getElementById('positionChart').getContext('2d');
+            const positionChart = new Chart(positionCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Average Position',
+                        data: [],
+                        borderColor: '#4285F4',
+                        backgroundColor: 'rgba(66, 133, 244, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            reverse: true,
+                            min: 5,
+                            max: 15,
+                            ticks: {
+                                stepSize: 2
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Top Pages Chart
+            const pagesCtx = document.getElementById('pagesChart').getContext('2d');
+            const pagesChart = new Chart(pagesCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Average Position',
+                        data: [],
+                        backgroundColor: [],
+                        borderColor: [],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            reverse: true,
+                            min: 0,
+                            max: 15,
+                            ticks: {
+                                stepSize: 3
+                            }
+                        }
+                    },
+                    indexAxis: 'y',
+                }
+            });
+        }
+
+        // Call the function when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the tables_data from the server
+            const tablesData = JSON.parse(document.getElementById('tablesData').textContent);
+            populateKeywordTable(tablesData);
+        });
+    </script>
+
+    <!-- Hidden element to store the data -->
+    <script id="tablesData" type="application/json">
+        {{ tables_data|tojson|safe }}
+    </script>
+
+    
+
+    <script>
+        // Remove the old signout event listener and use direct link
+        // The link will handle the redirect automatically
+    </script>
+</body>
+</html>
+
