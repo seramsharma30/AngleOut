@@ -1,0 +1,19 @@
+{
+    "web": {
+        "client_id": "980797405797-bipqqle35v9asrqfo2i0lsqbk96jojgf.apps.googleusercontent.com",
+        "project_id": "seo-tools-432821",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "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",
+        "redirect_uris": [
+            "https://127.0.0.1:5000/auth/gsc_oauth2callback",
+            "https://127.0.0.1:5000/gsc_oauth2callback",
+            "https://seo-tools-432821.el.r.appspot.com",
+            "https://seo-tools-432821.el.r.appspot.com/gsc_oauth2callback"
+        ],
+        "javascript_origins": [
+            "https://127.0.0.1:5000"
+        ]
+    }
+}
