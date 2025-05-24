@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=300)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
 
 firebase_db = init_firebase_db()
