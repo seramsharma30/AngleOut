@@ -79,6 +79,9 @@ def fetch_search_console_data(webmasters_service, website_url,
     
     all_responses = []
     start_row = 0
+    rowLimit = 25000
+    if dimensions == ['QUERY']:
+        rowLimit = 100
 
     # Loop until all rows have been retrieved
     while True:
@@ -87,7 +90,7 @@ def fetch_search_console_data(webmasters_service, website_url,
             "startDate": start_date,
             "endDate": end_date,
             "dimensions": dimensions,
-            "rowLimit": 25000,
+            "rowLimit": rowLimit,
             "dataState": "all",
             "startRow": start_row,
         }
@@ -99,6 +102,8 @@ def fetch_search_console_data(webmasters_service, website_url,
 
         start_row += len(rows)
         if len(rows) == 0:
+            break
+        if dimensions == ['QUERY']:
             break
 
     return pd.DataFrame(all_responses, columns=dimensions + ['Clicks', 'Impressions', 'CTR', 'Position'])
