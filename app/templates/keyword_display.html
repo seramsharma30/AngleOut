@@ -244,18 +244,31 @@
             return types.length > 0 ? types : ['NONE'];
         }
 
+        // Function to determine opportunity based on impressions and position
+        function determineOpportunity(impressions, position) {
+            if (impressions > 1000 && position >= 5 && position <= 15) {
+                return 'high';
+            } else if (impressions < 1000 && position >= 15 && position <= 30) {
+                return 'medium';
+            } else {
+                return 'low';
+            }
+        }
+
         // Function to get filtered keywords
         function getFilteredKeywords() {
             const baseKeywords = Object.keys(results_df.query).map(index => {
                 const keyword = results_df.query[index];
+                const impressions = results_df.Impressions[index] || 0;
+                const position = results_df.Position[index] || 0;
                 return {
                     keyword: keyword,
-                    volume: results_df.Impressions[index] || 0,
+                    volume: impressions,
                     clicks: results_df.Clicks[index] || 0,
                     ctr: results_df.CTR[index] || 0,
-                    position: results_df.Position[index] || 0,
+                    position: position,
                     types: determineKeywordTypes(keyword),
-                    opportunity: ['high', 'medium', 'low'][Math.floor(Math.random() * 3)]
+                    opportunity: determineOpportunity(impressions, position)
                 };
             }).filter(keyword => !keyword.types.includes('NONE'));
 
