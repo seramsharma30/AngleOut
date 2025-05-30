@@ -70,6 +70,11 @@
               <i class="fas fa-chart-line mr-3 text-gray-500 group-hover:text-blue-700"></i>
               Content Decay
             </a>
+            <a href="/keywordvault"
+              class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+              <i class="fas fa-key mr-3 text-gray-500 group-hover:text-blue-700"></i>
+              KEYWORD VAULT
+            </a>
             <a href="#"
               class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
               <i class="fas fa-tools mr-3 text-gray-500 group-hover:text-blue-700"></i>
@@ -239,10 +244,10 @@
           <input type="text" name="BRIEF" form="add_new_data" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <input type="text" name="PRIMARY KEYWORD" form="add_new_data" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+          <input type="text" name="PRIMARY_KEYWORD" form="add_new_data" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <select name="FUNNEL STAGE" form="add_new_data" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+          <select name="FUNNEL_STAGE" form="add_new_data" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
             <option value="TOFU">TOFU</option>
             <option value="MOFU">MOFU</option>
             <option value="BOFU">BOFU</option>
@@ -257,10 +262,10 @@
           </select>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <input type="text" name="LIVE URL" form="add_new_data" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+          <input type="text" name="LIVE_URL" form="add_new_data" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <input type="text" name="LAST UPDATED" value="${formattedDate}" form="add_new_data" readonly class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50">
+          <input type="text" name="LAST_UPDATED" value="${formattedDate}" form="add_new_data" readonly class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50">
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
           <button type="button" onclick="submitNewRow()" class="text-green-600 hover:text-green-900 mr-3">
@@ -297,7 +302,7 @@
           // Ensure the date is set before submission
           const today = new Date();
           const formattedDate = formatDate(today);
-          const lastUpdatedInput = form.querySelector('input[name="LAST UPDATED"]');
+          const lastUpdatedInput = form.querySelector('input[name="LAST_UPDATED"]');
           if (lastUpdatedInput) {
             lastUpdatedInput.value = formattedDate;
           }
@@ -369,10 +374,10 @@
 
       tableBody.innerHTML = items.map(item => {
         // Ensure URL is treated as external by adding http:// if not present
-        const liveUrl = item['LIVE URL'] && item['LIVE URL'].toLowerCase() !== 'not published' 
-          ? (item['LIVE URL'].startsWith('http://') || item['LIVE URL'].startsWith('https://') 
-              ? item['LIVE URL'] 
-              : `https://${item['LIVE URL']}`)
+        const liveUrl = item['LIVE_URL'] && item['LIVE_URL'].toLowerCase() !== 'not published' 
+          ? (item['LIVE_URL'].startsWith('http://') || item['LIVE_URL'].startsWith('https://') 
+              ? item['LIVE_URL'] 
+              : `https://${item['LIVE_URL']}`)
           : null;
 
         return `
@@ -389,11 +394,11 @@
             ${item['BRIEF']}
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            ${item['PRIMARY KEYWORD']}
+            ${item['PRIMARY_KEYWORD']}
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getFunnelStageBadgeClasses(item['FUNNEL STAGE'])}">
-              ${item['FUNNEL STAGE']}
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getFunnelStageBadgeClasses(item['FUNNEL_STAGE'])}">
+              ${item['FUNNEL_STAGE']}
             </span>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
@@ -411,7 +416,7 @@
             }
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            ${item['LAST UPDATED'] || 'Not updated'}
+            ${item['LAST_UPDATED'] || 'Not updated'}
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
             <div class="flex space-x-3 justify-end">
@@ -468,10 +473,10 @@
           <input type="text" name="BRIEF" form="edit_content_form" value="${cells[2].textContent.trim()}" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <input type="text" name="PRIMARY KEYWORD" form="edit_content_form" value="${cells[3].textContent.trim()}" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+          <input type="text" name="PRIMARY_KEYWORD" form="edit_content_form" value="${cells[3].textContent.trim()}" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <select name="FUNNEL STAGE" form="edit_content_form" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+          <select name="FUNNEL_STAGE" form="edit_content_form" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
             <option value="TOFU" ${cells[4].textContent.trim() === 'TOFU' ? 'selected' : ''}>TOFU</option>
             <option value="MOFU" ${cells[4].textContent.trim() === 'MOFU' ? 'selected' : ''}>MOFU</option>
             <option value="BOFU" ${cells[4].textContent.trim() === 'BOFU' ? 'selected' : ''}>BOFU</option>
@@ -486,10 +491,10 @@
           </select>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <input type="text" name="LIVE URL" form="edit_content_form" value="${cells[6].querySelector('a') ? cells[6].querySelector('a').href : ''}" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+          <input type="text" name="LIVE_URL" form="edit_content_form" value="${cells[6].querySelector('a') ? cells[6].querySelector('a').href : ''}" class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-          <input type="text" name="LAST UPDATED" value="${formatDate(new Date())}" form="edit_content_form" readonly class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50">
+          <input type="text" name="LAST_UPDATED" value="${formatDate(new Date())}" form="edit_content_form" readonly class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50">
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
           <button type="button" onclick="submitEdit()" class="text-green-600 hover:text-green-900 mr-3">
@@ -564,7 +569,7 @@
         .map(checkbox => checkbox.nextElementSibling.textContent.trim());
 
       const selectedStages = Array.from(document.querySelectorAll('.filters-panel input[type="checkbox"]:checked'))
-        .filter(checkbox => checkbox.closest('div').querySelector('h3').textContent.includes('Funnel Stage'))
+        .filter(checkbox => checkbox.closest('div').querySelector('h3').textContent.includes('Funnel_Stage'))
         .map(checkbox => checkbox.nextElementSibling.textContent.trim());
 
       const rows = document.querySelectorAll('#content-table-body tr');
