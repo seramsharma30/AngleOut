@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO SaaS Keyword Vault Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .animate-slideUp {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const projectSelect = document.getElementById('projects-ids');
+            const keywordVaultForm = document.getElementById('keywordVaultForm');
+
+            projectSelect.addEventListener('change', function() {
+                keywordVaultForm.submit();
+            });
+        });
+    </script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-white w-64 border-r border-gray-200 flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <div class="flex items-center">
+                    <span class="text-lg font-medium text-gray-800">Angle Out</span>
+                </div>
+                <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <nav class="p-2">
+                    <div class="mb-4">
+                        <a href="/dashboard"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-home mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Dashboard
+                        </a>
+                        <a href="/contenthub"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-file-alt mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Content Hub
+                        </a>
+                        <a href="/ranktracker"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-chart-line mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Rank Tracker
+                        </a>
+                        <a href="/monthlyreport"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-calendar-alt mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Monthly Report
+                        </a>
+                        <a href="/contentdecay"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-chart-line mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Content Decay
+                        </a>
+                        <a href="/keywordvault"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md bg-blue-50 text-blue-700">
+                            <i class="fas fa-key mr-3 text-blue-600 group-hover:text-blue-700"></i>
+                            Keyword Vault
+                        </a>
+                        <a href="#"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-tools mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Tools
+                        </a>
+                    </div>
+                </nav>
+            </div>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center">
+                    <img src="{{ profile_pic }}" alt="User" class="h-8 w-8 rounded-full mr-2">
+                    <div>
+                        <div class="text-sm font-medium text-gray-800">{{ user_name }}</div>
+                        <div class="text-xs text-gray-500">{{ user_email}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Top navigation -->
+            <header class="bg-white border-b border-gray-200">
+                <div class="flex items-center justify-end px-6 py-3">
+                    <div class="flex items-center space-x-4 mr-2">
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <a href="/signout" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="p-6">
+                <!-- Property selector -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                    <div class="mb-4 md:mb-0">
+                        <h1 class="text-2xl font-bold text-gray-900 mb-4">Keyword Vault</h1>
+                        <p class="text-gray-600 max-w-3xl">
+                            Optimize your content with data-driven keyword insights. Identify high-intent keywords, quick wins, and optimization opportunities from your Search Console data.
+                        </p>
+                    </div>
+                    <form id="keywordVaultForm" method="POST" action="/keywordvault"
+                        class="w-full md:w-auto flex flex-col md:flex-row md:items-center">
+                        <div>
+                            <div class="text-sm text-gray-500 mb-1">Property</div>
+                            <div class="flex items-center">
+                                <select id="projects-ids" name="projects-ids"
+                                    class="block w-64 px-4 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 appearance-none">
+                                    {% for each_site in site_list %}
+                                    {% if each_site == selected_property %}
+                                    <option value="{{ each_site }}" selected>{{ each_site }}</option>
+                                    {% else %}
+                                    <option value="{{ each_site }}">{{ each_site }}</option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabs -->
+                <div class="mt-8">
+                    <div class="sm:hidden">
+                        <select id="tabs-mobile" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <option value="urls">URLs</option>
+                            <!-- <option value="keywords">Keywords</option>
+                            <option value="opportunities">Opportunities</option> -->
+                        </select>
+                    </div>
+                    <div class="hidden sm:block">
+                        <div class="border-b border-gray-200">
+                            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                                <button class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="urls">
+                                    URLs
+                                </button>
+                                <!-- <button class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="keywords">
+                                    Keywords
+                                </button>
+                                <button class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="opportunities">
+                                    Opportunities -->
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="mt-6">
+                    <!-- URLs Tab -->
+                    <div id="urls-tab" class="tab-content">
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i data-lucide="search" class="h-5 w-5 text-gray-400"></i>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        id="search-urls"
+                                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        placeholder="Search URLs..."
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                URL PATH
+                                            </th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                IMPRESSIONS
+                                            </th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                CLICKS
+                                            </th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                POSITION
+                                            </th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                ACTIONS
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="url-table-body" class="bg-white divide-y divide-gray-200">
+                                        <!-- Table rows will be dynamically inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                                <div class="text-sm text-gray-700" id="table-info">
+                                    <!-- Table info will be dynamically updated -->
+                                </div>
+                                <div class="flex items-center space-x-2" id="pagination">
+                                    <!-- Pagination will be dynamically inserted here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Keywords Tab -->
+                    <div id="keywords-tab" class="tab-content hidden">
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i data-lucide="search" class="h-5 w-5 text-gray-400"></i>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                            placeholder="Search keywords..."
+                                        >
+                                    </div>
+                                    <div class="flex space-x-3">
+                                        <button class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                            <i data-lucide="filter" class="w-4 h-4 mr-2"></i>
+                                            Filter
+                                        </button>
+                                        <button class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                            <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                                            Export Keywords
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="px-6 py-8 text-center">
+                                <div class="max-w-sm mx-auto">
+                                    <i data-lucide="search" class="mx-auto h-12 w-12 text-gray-400"></i>
+                                    <h3 class="mt-2 text-sm font-medium text-gray-900">No keywords selected</h3>
+                                    <p class="mt-1 text-sm text-gray-500">
+                                        Select a URL from the URLs tab to view its keywords or use the search to find specific keywords.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Opportunities Tab -->
+                    <div id="opportunities-tab" class="tab-content hidden">
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+                                    <div class="relative">
+                                        <select class="block w-48 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                            <option>All Opportunities</option>
+                                            <option>Quick Wins</option>
+                                            <option>High Intent</option>
+                                            <option>Content Gaps</option>
+                                        </select>
+                                    </div>
+                                    <button class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                                        Create Report
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="px-6 py-8 text-center">
+                                <div class="max-w-sm mx-auto">
+                                    <i data-lucide="trending-up" class="mx-auto h-12 w-12 text-gray-400"></i>
+                                    <h3 class="mt-2 text-sm font-medium text-gray-900">No opportunities found</h3>
+                                    <p class="mt-1 text-sm text-gray-500">
+                                        We're analyzing your keywords to identify optimization opportunities. Check back soon.
+                                    </p>
+                                    <div class="mt-6">
+                                        <button class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+                                            Refresh Analysis
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Keyword Modal Template -->
+    <div id="keyword-modal" class="hidden fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 animate-fadeIn">
+        <div class="relative w-full max-w-5xl mx-4 my-8 bg-white rounded-lg shadow-xl animate-slideUp sm:mx-auto">
+            <div class="flex items-start justify-between p-4 border-b border-gray-200">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Keywords for URL</h2>
+                    <p id="modal-url-path" class="mt-1 text-sm text-gray-600 max-w-2xl truncate"></p>
+                </div>
+                <button id="close-modal" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="p-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
+                    <div class="relative" id="keyword-type-dropdown">
+                        <button type="button" class="inline-flex items-center justify-between w-64 px-4 py-2.5 text-sm font-medium bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <span>All Keywords</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <button class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                            Export Keywords
+                        </button>
+                        <button class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            <i data-lucide="trending-up" class="w-4 h-4 mr-2"></i>
+                            Create Opportunity Report
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    URL PATH
+                                </th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    IMPRESSIONS
+                                </th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    CLICKS
+                                </th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    POSITION
+                                </th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    ACTIONS
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="keyword-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Table rows will be dynamically inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex justify-end p-4 border-t border-gray-200">
+                <button class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" onclick="closeModal()">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Mock data
+        const mockUrls = [
+            {
+                id: '1',
+                url: '/blog/seo-best-practices-2023',
+                impressions: 25430,
+                position: 4.2,
+                keywordCount: 156
+            },
+            {
+                id: '2',
+                url: '/products/seo-tools',
+                impressions: 18750,
+                position: 3.8,
+                keywordCount: 89
+            },
+            {
+                id: '3',
+                url: '/services/content-marketing',
+                impressions: 12680,
+                position: 5.1,
+                keywordCount: 124
+            },
+            {
+                id: '4',
+                url: '/blog/content-strategy-guide',
+                impressions: 9870,
+                position: 6.3,
+                keywordCount: 78
+            },
+            {
+                id: '5',
+                url: '/case-studies/ecommerce-seo',
+                impressions: 8540,
+                position: 7.4,
+                keywordCount: 65
+            }
+        ];
+
+        const mockKeywords = {
+            '1': [
+                { id: 'k1', keyword: 'seo best practices', volume: 6500, intent: 'Research', position: 4, opportunity: 'high', type: 'informational' },
+                { id: 'k2', keyword: 'seo optimization guide', volume: 3800, intent: 'Research', position: 6, opportunity: 'medium', type: 'informational' },
+                { id: 'k3', keyword: 'how to improve seo ranking', volume: 5200, intent: 'Research', position: 5, opportunity: 'high', type: 'informational' },
+                { id: 'k4', keyword: 'best seo tools 2023', volume: 7800, intent: 'Commercial', position: 3, opportunity: 'high', type: 'high-intent' },
+                { id: 'k5', keyword: 'seo strategy template', volume: 2500, intent: 'Research', position: 7, opportunity: 'medium', type: 'informational' }
+            ]
+        };
+
+        // State management
+        let currentSort = { field: 'impressions', direction: 'desc' };
+        let searchTerm = '';
+        let currentTab = 'urls';
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        const maxPaginationButtons = 5;
+
+        // Utility functions
+        function formatNumber(num) {
+            return num.toLocaleString();
+        }
+
+        function getOpportunityVariant(opportunity) {
+            switch (opportunity) {
+                case 'high': return 'bg-green-100 text-green-800';
+                case 'medium': return 'bg-yellow-100 text-yellow-800';
+                case 'low': return 'bg-gray-100 text-gray-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function getTypeVariant(type) {
+            switch (type) {
+                case 'informational': return 'bg-sky-100 text-sky-800';
+                case 'high-intent': return 'bg-purple-100 text-purple-800';
+                case 'quick-win': return 'bg-green-100 text-green-800';
+                case 'long-tail': return 'bg-yellow-100 text-yellow-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function renderPagination(totalRows) {
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+            if (totalRows <= rowsPerPage) {
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            let startPage = Math.max(1, currentPage - Math.floor(maxPaginationButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxPaginationButtons - 1);
+
+            if (endPage - startPage + 1 < maxPaginationButtons) {
+                startPage = Math.max(1, endPage - maxPaginationButtons + 1);
+            }
+
+            const paginationHTML = `
+                <button 
+                    class="px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}"
+                    ${currentPage === 1 ? 'disabled' : ''}
+                    onclick="changePage(${currentPage - 1})"
+                >
+                    Previous
+                </button>
+                ${Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
+                    .map(pageNum => `
+                        <button 
+                            class="px-3 py-1 border ${currentPage === pageNum ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-gray-300 text-gray-700'} text-sm font-medium rounded-md hover:bg-gray-50"
+                            onclick="changePage(${pageNum})"
+                        >
+                            ${pageNum}
+                        </button>
+                    `).join('')}
+                <button 
+                    class="px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}"
+                    ${currentPage === totalPages ? 'disabled' : ''}
+                    onclick="changePage(${currentPage + 1})"
+                >
+                    Next
+                </button>
+            `;
+
+            document.getElementById('pagination').innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            renderUrlTable();
+        }
+
+        // URL Table functions
+        function renderUrlTable() {
+            const tableBody = document.getElementById('url-table-body');
+            const results = JSON.parse('{{ results_df | tojson | safe }}');
+            
+            const rows = [];
+            for (let i = 0; i < Object.keys(results.PAGE).length; i++) {
+                rows.push({
+                    url: results.PAGE[i],
+                    impressions: results.Impressions[i],
+                    clicks: results.Clicks[i],
+                    position: results.Position[i]
+                });
+            }
+
+            // Filter URLs based on search term matching only the URL PATH
+            const searchTermLower = searchTerm.toLowerCase();
+            const filteredUrls = rows.filter(url => 
+                url.url.toLowerCase().includes(searchTermLower)
+            );
+
+            // Sort results to prioritize exact matches
+            const sortedUrls = [...filteredUrls].sort((a, b) => {
+                const aUrl = a.url.toLowerCase();
+                const bUrl = b.url.toLowerCase();
+                
+                // Check for exact matches
+                const aExactMatch = aUrl === searchTermLower;
+                const bExactMatch = bUrl === searchTermLower;
+                
+                if (aExactMatch && !bExactMatch) return -1;
+                if (!aExactMatch && bExactMatch) return 1;
+                
+                // If both are exact matches or both are partial matches, use the original sort
+                const aValue = a[currentSort.field];
+                const bValue = b[currentSort.field];
+                const modifier = currentSort.direction === 'asc' ? 1 : -1;
+                
+                return typeof aValue === 'string'
+                    ? aValue.localeCompare(bValue) * modifier
+                    : (aValue - bValue) * modifier;
+            });
+
+            // Reset to first page when search term changes
+            if (searchTerm !== document.getElementById('search-urls').value) {
+                currentPage = 1;
+                searchTerm = document.getElementById('search-urls').value;
+            }
+
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedUrls = sortedUrls.slice(startIndex, endIndex);
+
+            tableBody.innerHTML = paginatedUrls.map(url => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-left">
+                        <div class="text-sm font-medium text-gray-900">${url.url}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="text-sm text-gray-900">${formatNumber(url.impressions)}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="text-sm text-gray-900">${formatNumber(url.clicks)}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="text-sm text-gray-900">${url.position.toFixed(1)}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <a href="/keywordvault/urls/${encodeURIComponent(url.url)}"
+                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <i data-lucide="eye" class="w-4 h-4 mr-2"></i>
+                            View Keywords
+                        </a>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Update table info
+            document.getElementById('table-info').textContent = 
+                `Showing ${filteredUrls.length > 0 ? startIndex + 1 : 0}-${Math.min(endIndex, filteredUrls.length)} of ${filteredUrls.length} URLs`;
+
+            // Render pagination
+            renderPagination(filteredUrls.length);
+
+            // Reinitialize Lucide icons for new content
+            lucide.createIcons();
+        }
+
+        // Keyword Modal functions
+        function openKeywordModal(urlId, urlPath) {
+            const modal = document.getElementById('keyword-modal');
+            const modalUrlPath = document.getElementById('modal-url-path');
+            
+            modalUrlPath.textContent = urlPath;
+            modal.classList.remove('hidden');
+            
+            renderKeywordTable(urlId);
+        }
+
+        function closeModal() {
+            document.getElementById('keyword-modal').classList.add('hidden');
+        }
+
+        function renderKeywordTable(urlId) {
+            const keywords = mockKeywords[urlId] || [];
+            const tableBody = document.getElementById('keyword-table-body');
+            
+            tableBody.innerHTML = keywords.map(keyword => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-left">
+                        <div class="font-medium text-gray-900">${keyword.keyword}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="text-sm text-gray-900">${formatNumber(keyword.volume)}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="text-sm text-gray-900">${(keyword.volume / 100).toFixed(2)}%</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="text-sm ${keyword.position < 10 ? 'text-green-600 font-medium' : 'text-gray-900'}">
+                            ${keyword.position.toFixed(1)}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="flex justify-center space-x-2">
+                            <button class="text-blue-600 hover:text-blue-800" onclick="viewKeywords('${urlId}', '${keyword.keyword}')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                            <button class="text-purple-600 hover:text-purple-800">
+                                <i data-lucide="zap" class="w-4 h-4"></i>
+                            </button>
+                            <button class="text-gray-600 hover:text-gray-800">
+                                <i data-lucide="external-link" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Reinitialize Lucide icons for new content
+            lucide.createIcons();
+        }
+
+        function switchTab(tabName) {
+            // Update mobile select if it doesn't match
+            const mobileSelect = document.getElementById('tabs-mobile');
+            if (mobileSelect.value !== tabName) {
+                mobileSelect.value = tabName;
+            }
+
+            // Update tab buttons
+            document.querySelectorAll('[data-tab]').forEach(tab => {
+                if (tab.getAttribute('data-tab') === tabName) {
+                    tab.classList.remove('border-transparent', 'text-gray-500');
+                    tab.classList.add('border-blue-500', 'text-blue-600');
+                } else {
+                    tab.classList.remove('border-blue-500', 'text-blue-600');
+                    tab.classList.add('border-transparent', 'text-gray-500');
+                }
+            });
+
+            // Show/hide content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+
+            currentTab = tabName;
+        }
+
+        // Event Listeners
+        document.getElementById('search-urls').addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            currentPage = 1; // Reset to first page when searching
+            renderUrlTable();
+        });
+
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+                const field = th.dataset.sort;
+                if (currentSort.field === field) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.field = field;
+                    currentSort.direction = 'desc';
+                }
+                renderUrlTable();
+            });
+        });
+
+        document.getElementById('keyword-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('keyword-modal')) {
+                closeModal();
+            }
+        });
+
+        document.querySelectorAll('[data-tab]').forEach(tab => {
+            tab.addEventListener('click', () => {
+                switchTab(tab.getAttribute('data-tab'));
+            });
+        });
+
+        document.getElementById('tabs-mobile').addEventListener('change', (e) => {
+            switchTab(e.target.value);
+        });
+
+        // Initialize table
+        renderUrlTable();
+    </script>
+</body>
+</html>

@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyword Display - SEO SaaS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-white w-64 border-r border-gray-200 flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <div class="flex items-center">
+                    <span class="text-lg font-medium text-gray-800">Angle Out</span>
+                </div>
+                <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <nav class="p-2">
+                    <div class="mb-4">
+                        <a href="/dashboard"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-home mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Dashboard
+                        </a>
+                        <a href="/contenthub"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-file-alt mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Content Hub
+                        </a>
+                        <a href="/ranktracker"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-chart-line mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Rank Tracker
+                        </a>
+                        <a href="/monthlyreport"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-calendar-alt mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Monthly Report
+                        </a>
+                        <a href="/contentdecay"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-chart-line mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Content Decay
+                        </a>
+                        <a href="/keywordvault"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md bg-blue-50 text-blue-700">
+                            <i class="fas fa-key mr-3 text-blue-600 group-hover:text-blue-700"></i>
+                            Keyword Vault
+                        </a>
+                        <a href="#"
+                            class="group flex items-center my-1 px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700">
+                            <i class="fas fa-tools mr-3 text-gray-500 group-hover:text-blue-700"></i>
+                            Tools
+                        </a>
+                    </div>
+                </nav>
+            </div>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center">
+                    <img src="{{ profile_pic }}" alt="User" class="h-8 w-8 rounded-full mr-2">
+                    <div>
+                        <div class="text-sm font-medium text-gray-800">{{ user_name }}</div>
+                        <div class="text-xs text-gray-500">{{ user_email}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Top navigation -->
+            <header class="bg-white border-b border-gray-200">
+                <div class="flex items-center justify-end px-6 py-3">
+                    <div class="flex items-center space-x-4 mr-2">
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <a href="/signout" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="p-6">
+                <div class="mb-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Keywords for URL</h1>
+                            <p id="url-path" class="mt-1 text-sm text-gray-600 max-w-2xl truncate"></p>
+                        </div>
+                        <a href="/keywordvault" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to Keyword Vault
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="p-4 border-b border-gray-200">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
+                            <div class="relative" id="keyword-type-dropdown">
+                                <button type="button" id="keyword-type-button" class="inline-flex items-center justify-between w-64 px-4 py-2.5 text-sm font-medium bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <span id="selected-keyword-type">All Keywords</span>
+                                    <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
+                                </button>
+                                <div id="keyword-type-menu" class="hidden absolute z-50 mt-1 w-64 bg-white shadow-lg rounded-md border border-gray-200">
+                                    <div class="py-1">
+                                        <button class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center" data-type="all">
+                                            <i data-lucide="list" class="w-4 h-4 mr-2"></i>
+                                            All Keywords
+                                        </button>
+                                        <button class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center" data-type="informational">
+                                            <i data-lucide="info" class="w-4 h-4 mr-2"></i>
+                                            Informational Keywords
+                                        </button>
+                                        <button class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center" data-type="high-intent">
+                                            <i data-lucide="target" class="w-4 h-4 mr-2"></i>
+                                            High Intent Keywords
+                                        </button>
+                                        <button class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center" data-type="long-tail">
+                                            <i data-lucide="trending-up" class="w-4 h-4 mr-2"></i>
+                                            Long Tail Keywords
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex space-x-3">
+                                <!-- <button class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                                    Export Keywords
+                                </button>
+                                <button class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                    <i data-lucide="trending-up" class="w-4 h-4 mr-2"></i>
+                                    Create Opportunity Report
+                                </button> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider max-w-[200px]">
+                                        Keyword
+                                    </th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Volume
+                                    </th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        CTR
+                                    </th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        CLICKS
+                                    </th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Position
+                                    </th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Type
+                                    </th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Opportunity
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="keyword-table-body" class="bg-white divide-y divide-gray-200 min-h-[400px]">
+                                <!-- Keyword rows will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                        <div class="text-sm text-gray-700" id="table-info">
+                            <!-- Table info will be dynamically updated -->
+                        </div>
+                        <div class="flex items-center space-x-2" id="pagination">
+                            <!-- Pagination will be dynamically inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Get the results data from Flask
+        const results_df = JSON.parse('{{ results_df | tojson | safe }}');
+        const urlPath = "{{ url }}"; // Use the URL passed from Python route
+
+        // Set URL path in the header
+        document.getElementById('url-path').textContent = urlPath;
+
+        // Global variables for filtering and pagination
+        let currentFilterType = 'all';
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        const maxPaginationButtons = 5;
+
+        // Regex patterns for keyword types
+        const informationalRegex = /\b(who|what|where|when|why|how|am|is|are|was|were|do|does|did|have|has|had|can|could|shall|should|will|would|may|might|must)\b.*|\?.*$/i;
+        const longTailRegex = /^.{25,}$/;
+        const highIntentRegex = /\b(automation|stack|enterprise|gdpr|crm|template|checklist|matrix|integrate|integration|practices|setup|calculator|strategy|automate|alternatives|pricing|review|vs|buy|free|comparison)\b/i;
+
+        // Function to determine keyword types based on patterns
+        function determineKeywordTypes(keyword) {
+            const types = [];
+            
+            if (informationalRegex.test(keyword)) {
+                types.push('informational');
+            }
+            if (longTailRegex.test(keyword)) {
+                types.push('long-tail');
+            }
+            if (highIntentRegex.test(keyword)) {
+                types.push('high-intent');
+            }
+            
+            // Return 'NONE' if no patterns match
+            return types.length > 0 ? types : ['NONE'];
+        }
+
+        // Function to get filtered keywords
+        function getFilteredKeywords() {
+            const baseKeywords = Object.keys(results_df.query).map(index => {
+                const keyword = results_df.query[index];
+                return {
+                    keyword: keyword,
+                    volume: results_df.Impressions[index] || 0,
+                    clicks: results_df.Clicks[index] || 0,
+                    ctr: results_df.CTR[index] || 0,
+                    position: results_df.Position[index] || 0,
+                    types: determineKeywordTypes(keyword),
+                    opportunity: ['high', 'medium', 'low'][Math.floor(Math.random() * 3)]
+                };
+            }).filter(keyword => !keyword.types.includes('NONE'));
+
+            return currentFilterType === 'all' 
+                ? baseKeywords 
+                : baseKeywords.filter(k => k.types.includes(currentFilterType));
+        }
+
+        // Utility functions
+        function formatNumber(num) {
+            return num ? num.toLocaleString() : '0';
+        }
+
+        function formatPercentage(num) {
+            return num ? num.toFixed(2) + '%' : '0.00%';
+        }
+
+        function getOpportunityVariant(opportunity) {
+            switch (opportunity) {
+                case 'high': return 'bg-green-100 text-green-800';
+                case 'medium': return 'bg-yellow-100 text-yellow-800';
+                case 'low': return 'bg-gray-100 text-gray-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function getTypeVariant(type) {
+            switch (type) {
+                case 'informational': return 'bg-sky-100 text-sky-800';
+                case 'high-intent': return 'bg-purple-100 text-purple-800';
+                case 'long-tail': return 'bg-yellow-100 text-yellow-800';
+                case 'NONE': return 'bg-gray-100 text-gray-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function renderPagination(totalRows) {
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+            if (totalRows <= rowsPerPage) {
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            let startPage = Math.max(1, currentPage - Math.floor(maxPaginationButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxPaginationButtons - 1);
+
+            if (endPage - startPage + 1 < maxPaginationButtons) {
+                startPage = Math.max(1, endPage - maxPaginationButtons + 1);
+            }
+
+            const paginationHTML = `
+                <button 
+                    class="px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}"
+                    ${currentPage === 1 ? 'disabled' : ''}
+                    onclick="changePage(${currentPage - 1})"
+                >
+                    Previous
+                </button>
+                ${Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
+                    .map(pageNum => `
+                        <button 
+                            class="px-3 py-1 border ${currentPage === pageNum ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-gray-300 text-gray-700'} text-sm font-medium rounded-md hover:bg-gray-50"
+                            onclick="changePage(${pageNum})"
+                        >
+                            ${pageNum}
+                        </button>
+                    `).join('')}
+                <button 
+                    class="px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}"
+                    ${currentPage === totalPages ? 'disabled' : ''}
+                    onclick="changePage(${currentPage + 1})"
+                >
+                    Next
+                </button>
+            `;
+
+            document.getElementById('pagination').innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            renderKeywordTable();
+        }
+
+        // Render keyword table
+        function renderKeywordTable() {
+            const tableBody = document.getElementById('keyword-table-body');
+            
+            if (!tableBody) {
+                console.error('Table body element not found');
+                return;
+            }
+
+            // Check if we have any keywords
+            if (!results_df.query || Object.keys(results_df.query).length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center h-[400px]">
+                            <div class="flex flex-col items-center justify-center text-gray-500 h-full">
+                                <i data-lucide="alert-circle" class="w-12 h-12 mb-4 text-gray-400"></i>
+                                <p class="text-lg font-medium text-gray-700">No keywords are there</p>
+                            </div>
+                        </td>
+                    </tr>
+                    ${Array(4).fill(`
+                        <tr class="h-[80px]">
+                            <td colspan="7" class="px-6 py-4"></td>
+                        </tr>
+                    `).join('')}
+                `;
+                return;
+            }
+
+            // Get filtered keywords
+            const keywordsToRender = getFilteredKeywords();
+
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedKeywords = keywordsToRender.slice(startIndex, endIndex);
+
+            // Calculate how many empty rows we need to add
+            const emptyRowsNeeded = Math.max(0, 5 - paginatedKeywords.length);
+            const emptyRows = Array(emptyRowsNeeded).fill(`
+                <tr class="h-[80px]">
+                    <td colspan="7" class="px-6 py-4"></td>
+                </tr>
+            `).join('');
+
+            const tableContent = paginatedKeywords.map(keyword => `
+                    <tr class="hover:bg-gray-50 transition-colors h-[80px]">
+                    <td class="px-6 py-4 whitespace-nowrap text-left max-w-[200px]">
+                        <div class="font-medium text-gray-900 truncate" title="${keyword.keyword}">${keyword.keyword}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <div class="text-sm text-gray-900">${formatNumber(keyword.volume)}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="text-sm text-gray-900">${formatPercentage(keyword.ctr)}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <div class="text-sm text-gray-900">${formatNumber(keyword.clicks)}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <div class="text-sm ${keyword.position < 10 ? 'text-green-600 font-medium' : 'text-gray-900'}">
+                                ${keyword.position.toFixed(1)}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <div class="flex flex-wrap gap-1 justify-center">
+                                ${keyword.types.map(type => `
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeVariant(type)}">
+                                        ${type.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getOpportunityVariant(keyword.opportunity)}">
+                                ${keyword.opportunity.charAt(0).toUpperCase() + keyword.opportunity.slice(1)}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('') + emptyRows;
+
+            tableBody.innerHTML = tableContent;
+
+            // Update table info
+            document.getElementById('table-info').textContent = 
+                `Showing ${keywordsToRender.length > 0 ? startIndex + 1 : 0}-${Math.min(endIndex, keywordsToRender.length)} of ${keywordsToRender.length} keywords`;
+
+            // Render pagination
+            renderPagination(keywordsToRender.length);
+
+            // Reinitialize Lucide icons for new content
+            lucide.createIcons();
+        }
+
+        // Initialize the page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            renderKeywordTable();
+
+            // Dropdown functionality
+            const dropdownButton = document.getElementById('keyword-type-button');
+            const dropdownMenu = document.getElementById('keyword-type-menu');
+            const selectedType = document.getElementById('selected-keyword-type');
+
+            // Toggle dropdown
+            dropdownButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('hidden');
+            });
+
+            // Handle option selection
+            dropdownMenu.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const type = button.dataset.type;
+                    selectedType.textContent = button.textContent.trim();
+                    dropdownMenu.classList.add('hidden');
+                    
+                    // Update current filter type and reset to first page
+                    currentFilterType = type;
+                    currentPage = 1;
+                    
+                    // Re-render table with new filter
+                    renderKeywordTable();
+                });
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!dropdownButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.add('hidden');
+                }
+            });
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html> 
