@@ -81,7 +81,7 @@ def fetch_search_console_data(webmasters_service, website_url,
     start_row = 0
     rowLimit = 25000
     if dimensions == ['QUERY']:
-        rowLimit = 100
+        rowLimit = 1000
 
     # Loop until all rows have been retrieved
     while True:
@@ -155,3 +155,78 @@ def fetch_search_console_data_ranktracker(webmasters_service, website_url,
             break
 
     return pd.DataFrame(all_responses, columns=['page'] + ['Clicks', 'Impressions', 'CTR', 'Position'])
+
+
+
+def fetch_search_console_data_keyword_valut(webmasters_service, website_url,
+                              start_date, end_date, dimensions = ['PAGE'], dimensionFilterGroups = None):
+    
+    all_responses = []
+    start_row = 0
+    rowLimit = 200
+    # Loop until all rows have been retrieved
+    while True:
+        # Build the request body for the API call
+        request_body = {
+            "startDate": start_date,
+            "endDate": end_date,
+            "dimensions": dimensions,
+            "rowLimit": rowLimit,
+            "dataState": "all",
+            "startRow": start_row,
+        }
+
+        # Call the API with the request body
+        response_data = webmasters_service.searchanalytics().query(siteUrl=website_url, body=request_body).execute()
+        rows = response_data.get("rows", [])
+        all_responses.extend([each["keys"] + [each['clicks'], each['impressions'], each['ctr'], each['position']] for each in rows])
+
+        start_row += len(rows)
+        if len(rows) == 0:
+            break
+
+    return pd.DataFrame(all_responses, columns=dimensions + ['Clicks', 'Impressions', 'CTR', 'Position'])
+
+
+
+def fetch_search_console_data_keyword_display(webmasters_service, website_url, 
+                                     start_date, end_date,  url = None):
+    
+    all_responses = []
+    start_row = 0
+
+    if not url:
+        return "No url provided"
+    # Loop until all rows have been retrieved
+    while True:
+        # Build the request body for the API call
+        request_body = {
+            "startDate": start_date,
+            "endDate": end_date,
+            "dimensions": ['QUERY'],
+            "dimensionFilterGroups": [
+                {
+                    'filters' : [
+                        {
+                            'dimension' : 'page',
+                            'operator' : 'equals',
+                            'expression' : url
+                        }
+                    ]
+                }
+            ],
+            "rowLimit": 200,
+            "dataState": "final",
+            "startRow": start_row,
+        }
+
+        # Call the API with the request body
+        response_data = webmasters_service.searchanalytics().query(siteUrl=website_url, body=request_body).execute()
+        rows = response_data.get("rows", [])
+        all_responses.extend([each["keys"] + [each['clicks'], each['impressions'], each['ctr'], each['position']] for each in rows])
+
+        start_row += len(rows)
+        if len(rows) < 25000:
+            break
+
+    return pd.DataFrame(all_responses, columns=['query'] + ['Clicks', 'Impressions', 'CTR', 'Position'])
