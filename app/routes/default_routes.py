@@ -1,5 +1,6 @@
 import os
 import re
+from urllib.parse import unquote
 from app import app
 from app.functions import *
 from datetime import datetime, timedelta, date
@@ -15,7 +16,6 @@ from app.firebase_db import get_keyword_tracker,  get_content_hub_data
 @app.route('/index', methods = ["GET", "POST"])
 def index():
     return render_template("index.html")
-
 
 @app.route('/dashboard', methods = ["GET", "POST"])
 def dashboard():
@@ -329,7 +329,6 @@ def ranktracker():
     except Exception as e:
         return f"""{e}"""
     
-
 @app.route('/contentdecay', methods = ["GET", "POST"])
 def contentdecay():
     try :
@@ -400,10 +399,6 @@ def contentdecay():
     except Exception as e:
         return f"""{e}"""
 
-
-
-
-
 @app.route('/contenthub', methods = ["GET", "POST"])
 def contenthub():
     try:
@@ -435,6 +430,86 @@ def contenthub():
                             site_list_sorted = site_list_sorted, selected_property = selected_property, 
                             user_email = user_email, content_hub_data = content_hub_data,
                             user_name = user_name, profile_pic = profile_pic)
+    except RefreshError:
+        return redirect(url_for("gsc_authorize"))
+    except Exception as e:
+        return f"""{e}"""
+
+@app.route('/keywordvault', methods = ["GET", "POST"])
+def keywordvault():
+
+    try :
+        if 'credentials' not in session:
+            return redirect(url_for("gsc_authorize"))
+        
+        user_name = session.get("user_name")
+        user_email = session.get("user_email")
+        profile_pic = session.get("profile_pic")
+
+        search_console_service = build_gsc_service()
+        site_list_sorted = get_site_urls(search_console_service)
+
+        selected_property = session.get('selected_property')
+
+        if not selected_property:
+            selected_property = site_list_sorted[0]
+            session['selected_property'] = selected_property
+        
+        if request.method == "POST":
+            selected_property = request.form.get("projects-ids")
+            session['selected_property'] = selected_property
+        
+        today = datetime.today()
+        start_date = today - timedelta(days=29)
+        end_date = today - timedelta(days=2)
+        start_date, end_date = start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')
+
+        
+        results_df = fetch_search_console_data_keyword_valut(webmasters_service = search_console_service, website_url = selected_property,
+                                                start_date=start_date, end_date=end_date, dimensions = ["PAGE"])
+            
+        results_df = results_df.to_dict()
+        # return f"""{results_df}"""
+        return render_template("keyword_vault.html", results_df  = results_df, site_list = site_list_sorted, selected_property = selected_property,
+                            user_email = user_email, user_name = user_name, profile_pic = profile_pic)
+    
+    except RefreshError:
+        return redirect(url_for("gsc_authorize"))
+    # except Exception as e:
+    #     return f"""{e}"""
+
+
+@app.route('/keywordvault/urls/<path:urls_>', methods = ["GET", "POST"])
+def keywordvault_urls(urls_):
+
+    try:
+        if 'credentials' not in session:
+            return redirect(url_for("gsc_authorize"))
+        decoded_url = unquote(urls_)
+        
+        user_name = session.get("user_name")
+        user_email = session.get("user_email")
+        profile_pic = session.get("profile_pic")
+        search_console_service = build_gsc_service()
+        
+        if request.method == "POST":
+            keyword_type = request.form.get("keyword-type")
+            session['keyword_type'] = keyword_type
+
+        today = datetime.today()
+        start_date = today - timedelta(days=29)
+        end_date = today - timedelta(days=2)
+        start_date, end_date = start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')
+
+        results_df = fetch_search_console_data_keyword_display(webmasters_service = search_console_service, website_url = session.get('selected_property'),
+                                                start_date=start_date, end_date=end_date, url = decoded_url)
+            
+        results_df = results_df.to_dict()
+        # return f"""{results_df}"""
+
+        return render_template("keyword_display.html", results_df  = results_df, url = decoded_url,
+                            user_email = user_email, user_name = user_name, profile_pic = profile_pic)
+    
     except RefreshError:
         return redirect(url_for("gsc_authorize"))
     except Exception as e:
