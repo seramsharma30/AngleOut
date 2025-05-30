@@ -37,11 +37,11 @@ def init_firebase_db():
                 'PRIORITY': 'init',
                 'NAME': 'init',
                 'BRIEF': 'init',
-                'PRIMARY KEYWORD': 'init',
-                'FUNNEL STAGE': 'init',
+                'PRIMARY_KEYWORD': 'init',
+                'FUNNEL_STAGE': 'init',
                 'STATUS': 'init',
-                'LIVE URL': 'init',
-                'LAST UPDATED': 'init'
+                'LIVE_URL': 'init',
+                'LAST_UPDATED': 'init'
             })
             print("Content hub collection created")
         else:
@@ -117,26 +117,52 @@ def get_content_hub_data(user_gmail, site_url):
         return f"Error fetching content hub data: {str(e)}"
     
 
+def check_content_hub_data(user_gmail, site_url, LIVE_URL):
+    """
+    Check if content hub data exists for a specific user and site
+    """
+    try:
+        if str(LIVE_URL).lower() not in ('not published', 'not live', 'not-published', 'not-live', 'notpublished', 'notlive'):
+            query = db.collection('content_hub').where('user_gmail', '==', user_gmail).where('site_url', '==', site_url).where('LIVE_URL', '==', LIVE_URL)
+            docs = query.stream()
+            records = []
+            for doc in docs:
+                data = doc.to_dict()
+                data['id'] = doc.id  # Add document ID
+                records.append(data)
+            if len(records)>0:
+                return True
+            else:
+                return False
+        else:
+            return False
+    except Exception as e:
+        print(f"{e}")
+        return f"Error checking content hub data: {str(e)}"
+
 def add_content_hub_data(user_gmail, site_url, PRIORITY, NAME, BRIEF,
                          PRIMARY_KEYWORD, FUNNEL_STAGE, STATUS, LIVE_URL, LAST_UPDATED):
     """
     Add content hub data for a specific user and site
     """
     try:
-        doc_ref = db.collection('content_hub').document()
-        doc_ref.set({
-            'site_url': site_url,
-            'user_gmail': user_gmail,
-            'PRIORITY': PRIORITY,
-            'NAME': NAME,
-            'BRIEF': BRIEF,
-            'PRIMARY KEYWORD': PRIMARY_KEYWORD,
-            'FUNNEL STAGE': FUNNEL_STAGE,
-            'STATUS': STATUS,
-            'LIVE URL': LIVE_URL,
-            'LAST UPDATED': LAST_UPDATED
-        })
-        return True
+        if not check_content_hub_data(user_gmail, site_url, LIVE_URL):
+            doc_ref = db.collection('content_hub').document()
+            doc_ref.set({
+                'site_url': site_url,
+                'user_gmail': user_gmail,
+                'PRIORITY': PRIORITY,
+                'NAME': NAME,
+                'BRIEF': BRIEF,
+                'PRIMARY_KEYWORD': PRIMARY_KEYWORD,
+                'FUNNEL_STAGE': FUNNEL_STAGE,
+                'STATUS': STATUS,
+                'LIVE_URL': LIVE_URL,
+                'LAST_UPDATED': LAST_UPDATED
+            })
+            return True
+        else:
+            return f"Live URL already exists"
     except Exception as e:
         return f"Error adding content hub data: {str(e)}"
 
@@ -167,11 +193,11 @@ def update_content_hub_data(user_gmail, site_url, PRIORITY, NAME, BRIEF,
                 'PRIORITY': PRIORITY,
                 'NAME': NAME,
                 'BRIEF': BRIEF,
-                'PRIMARY KEYWORD': PRIMARY_KEYWORD,
-                'FUNNEL STAGE': FUNNEL_STAGE,
+                'PRIMARY_KEYWORD': PRIMARY_KEYWORD,
+                'FUNNEL_STAGE': FUNNEL_STAGE,
                 'STATUS': STATUS,
-                'LIVE URL': LIVE_URL,
-                'LAST UPDATED': LAST_UPDATED
+                'LIVE_URL': LIVE_URL,
+                'LAST_UPDATED': LAST_UPDATED
             })
             return True
         else:
