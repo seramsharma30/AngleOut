@@ -1,4 +1,5 @@
 import os
+import json
 import re
 from urllib.parse import unquote
 from app import app
@@ -10,12 +11,15 @@ from app.routes.gsc_api_auth import *
 from flask import render_template, request, url_for, redirect, session
 from app.routes.gsc_apis import *
 from app.firebase_db import get_keyword_tracker,  get_content_hub_data
+from openai import OpenAI
 
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route('/', methods = ["GET", "POST"])
 @app.route('/index', methods = ["GET", "POST"])
+@app.route('/home', methods = ["GET", "POST"])
 def index():
-    return render_template("index.html")
+    return render_template("home.html")
 
 @app.route('/dashboard', methods = ["GET", "POST"])
 def dashboard():
@@ -510,6 +514,62 @@ def keywordvault_urls(urls_):
         return render_template("keyword_display.html", results_df  = results_df, url = decoded_url,
                             user_email = user_email, user_name = user_name, profile_pic = profile_pic)
     
+    except RefreshError:
+        return redirect(url_for("gsc_authorize"))
+    except Exception as e:
+        return f"""{e}"""
+
+@app.route('/schema_generator', methods = ["GET", "POST"])
+def schema_generator():
+    try:
+        if 'credentials' not in session:
+            return redirect(url_for("gsc_authorize"))
+        
+        user_name = session.get("user_name")
+        user_email = session.get("user_email")
+        profile_pic = session.get("profile_pic")
+        url = session.get('url', None)
+        schema_type = session.get('schema_type', None)
+        response = session.get('response', None)
+
+        prompt = '''You are an SEO expert. I will provide you with a website URL {url} and a schema type {schema_type}.
+        
+        Your task is to:
+        1. Analyze the content of the website.
+        2. Generate a valid JSON-LD structured data snippet using the given schema type.
+
+        Important rules:
+        - Use only information that is explicitly available on the website.
+        - Do not invent, assume, or hallucinate any data (e.g., reviews, ratings, prices, SKUs, availability, brand, etc.).
+        - If a field is present on the website, include it. If it is missing, omit it.
+        - Strive to include all available relevant fields for the given schema type based on the content found.
+        - Output only the raw JSON-LD code.
+        - Do not include any explanation, markdown, triple backticks, or additional characters.
+        - The output must be valid and suitable for SEO and compliant with schema.org standards.
+
+        '''
+
+        if request.method == "POST":
+            url = request.form.get("url")
+            schema_type = request.form.get("schema_type")
+            session['url'] = url
+            session['schema_type'] = schema_type
+
+        if url and schema_type:
+            prompt = prompt.format(url = url, schema_type = schema_type)
+            response = client.responses.create(
+                model="gpt-4.1",
+                input=prompt,
+                temperature=0
+                )
+            response = json.loads(response.output[0].content[0].text)
+            session['response'] = response
+
+        return render_template("schema_gen.html", user_name = user_name, user_email = user_email, profile_pic = profile_pic,
+                               url = url, schema_type = schema_type, response = response)
+    
+
+
     except RefreshError:
         return redirect(url_for("gsc_authorize"))
     except Exception as e:
