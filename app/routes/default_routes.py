@@ -532,22 +532,37 @@ def schema_generator():
         schema_type = session.get('schema_type', None)
         response = session.get('response', None)
 
-        prompt = '''You are an SEO expert. I will provide you with a website URL {url} and a schema type {schema_type}.
+        # prompt = '''You are an SEO expert. I will provide you with a website URL {url} and a schema type {schema_type}.
         
-        Your task is to:
-        1. Analyze the content of the website.
-        2. Generate a valid JSON-LD structured data snippet using the given schema type.
+        # Your task is to:
+        # 1. Analyze the content of the website.
+        # 2. Generate a valid JSON-LD structured data snippet using the given schema type.
 
-        Important rules:
-        - Use only information that is explicitly available on the website.
-        - Do not invent, assume, or hallucinate any data (e.g., reviews, ratings, prices, SKUs, availability, brand, etc.).
-        - If a field is present on the website, include it. If it is missing, omit it.
-        - Strive to include all available relevant fields for the given schema type based on the content found.
-        - Output only the raw JSON-LD code.
-        - Do not include any explanation, markdown, triple backticks, or additional characters.
-        - The output must be valid and suitable for SEO and compliant with schema.org standards.
+        # Important rules:
+        # - Use only information that is explicitly available on the website.
+        # - Do not invent, assume, or hallucinate any data (e.g., reviews, ratings, prices, SKUs, availability, brand, etc.).
+        # - If a field is present on the website, include it. If it is missing, omit it.
+        # - Strive to include all available relevant fields for the given schema type based on the content found.
+        # - Output only the raw JSON-LD code.
+        # - Do not include any explanation, markdown, triple backticks, or additional characters.
+        # - The output must be valid and suitable for SEO and compliant with schema.org standards.
 
-        '''
+        # '''
+        prompt = """Task:
+        You are an experienced SEO expert. I need you to generate an extensive {schema_type} schema for the website {url}. Please perform a thorough review of the site's structure and content, and provide a detailed {schema_type} schema in raw JSON format.
+        
+        Instructions:
+
+            - Visit the Website:
+                - Analyze the structure, layout, and organization of the site.
+                - Identify key sections, categories, and types of content (e.g., blog posts, product pages, service details, etc.).
+
+            - Output Requirements:
+                - Provide the schema output strictly in raw JSON-LD format.
+                - Do not include any explanation, markdown, triple backticks, or additional characters
+                - Include essential details like page names, URLs, content categories, and hierarchical relationships.
+                - Do not provide any hypothetical or assumed data — the schema must be based solely on what is available on the website after visiting it.
+            """
 
         if request.method == "POST":
             url = request.form.get("url")
