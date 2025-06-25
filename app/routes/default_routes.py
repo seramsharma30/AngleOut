@@ -12,6 +12,7 @@ from flask import render_template, request, url_for, redirect, session
 from app.routes.gsc_apis import *
 from app.firebase_db import get_keyword_tracker,  get_content_hub_data
 from openai import OpenAI
+from app.routes.ai_analysis import get_keywords_and_competitors
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
