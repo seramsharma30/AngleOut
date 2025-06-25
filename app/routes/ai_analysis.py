@@ -15,7 +15,7 @@ def get_keywords_and_competitors(domain):
     
     1. 'list_of_keywords' — return exactly 10 relevant, SEO-friendly keywords that are evergreen and directly related to the domain's niche. These keywords should be selected based on the domain’s content and focus, not on trending or time-sensitive data.
     
-    2. 'list_of_compitator_links' — return exactly 10 direct URLs (homepages) of top competitors for this domain. Base this on organic search similarity, content overlap, and target audience — and keep the output consistent for this domain every time.
+    2. 'list_of_compitator_links' — return exactly 10 direct URLs (homepages) of top competitors for this domain (list domain names of compitetors of given domain). And keep the output consistent for this domain every time.
     
     The output should be in the following strictJSON format:
     
