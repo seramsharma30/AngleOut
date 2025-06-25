@@ -589,3 +589,35 @@ def schema_generator():
         return redirect(url_for("gsc_authorize"))
     except Exception as e:
         return f"""{e}"""
+
+
+
+
+@app.route('/ai-analysis', methods = ['GET', 'POST'])
+def ai_analysis():
+    try:
+        if 'credentials' not in session:
+            return redirect(url_for("gsc_authorize"))
+        
+        user_name = session.get("user_name")
+        user_email = session.get("user_email")
+        profile_pic = session.get("profile_pic")
+
+        if request.method == "POST":
+            analysis_type = request.form.get("analysis_type")
+            search_query = request.form.get("search_query")
+
+            if analysis_type == "domain":
+                response = get_keywords_and_competitors(search_query)
+            return render_template('ai_results.html', response = response)
+            # return f"""{response}"""
+        
+        return render_template('ai.html', user_name = user_name, user_email = user_email, profile_pic = profile_pic)
+    
+
+
+    except RefreshError:
+        return redirect(url_for("gsc_authorize"))
+    except Exception as e:
+        return f"""{e}"""
+
